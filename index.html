@@ -905,6 +905,47 @@ tfoot td { font-weight: 600; } tr.big td { font-size: 14px; color: var(--accent)
 @media (max-width: 1240px) and (orientation: landscape) { #chips .chip:nth-child(2) { display: none; } }
 @media (max-height: 800px) { .tool { min-height: 44px; } .tool small { font-size: 9.5px; } #rail hr { margin: 2px 0; } }
 
+.mlist { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 8px; }
+button.chip2 { background: var(--panel2); color: var(--fg); cursor: pointer; font: 13px var(--mono); }
+button.chip2.on { border-color: var(--accent); color: var(--accent); }
+
+/* fichas técnicas y requisitos */
+.specs.wide { grid-template-columns: 1fr; }
+.specs.wide > div { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+.specs.wide b { text-align: right; font-size: 13px; }
+.reqs { display: grid; gap: 6px; }
+.req { display: flex; gap: 9px; align-items: flex-start; border: 1px solid var(--line); background: var(--panel2); border-radius: 9px; padding: 8px 10px; font-size: 13.5px; }
+.req > i { width: 18px; height: 18px; border-radius: 50%; flex: none; margin-top: 1px; display: grid; place-items: center; font: 700 12px var(--font); font-style: normal; color: #11161c; background: var(--cyan); }
+.req > i::before { content: "i"; }
+.req.ok > i { background: var(--ok); } .req.ok > i::before { content: "✓"; }
+.req.bad { border-color: rgba(239,91,91,.5); } .req.bad > i { background: var(--bad); } .req.bad > i::before { content: "!"; }
+.req b { display: block; } .req span { display: block; color: var(--muted); } .req .btn { margin-top: 6px; }
+.netcard { border: 1px solid var(--line); background: var(--panel2); border-radius: 10px; padding: 10px 12px; display: grid; gap: 6px; font-size: 13.5px; }
+.netcard span { color: var(--muted); } .netcard .btn { justify-self: start; }
+.ncards { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ncard { display: flex; gap: 10px; align-items: flex-start; border: 1px solid var(--line); background: var(--panel2); border-radius: 10px; padding: 10px; cursor: pointer; }
+.ncard:has(input:checked) { border-color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); }
+.ncard b { display: block; } .ncard small { display: block; color: var(--muted); font-size: 12.5px; margin-top: 2px; }
+.ncard.sm { margin-bottom: 6px; }
+.hyb.dim, #inetrow.dim { opacity: .35; pointer-events: none; }
+.ringTip { color: #fff; font: 600 11px var(--mono); text-align: center; text-shadow: 0 1px 3px #000, 0 0 2px #000; white-space: nowrap; }
+@media (max-width: 700px) { .ncards { grid-template-columns: 1fr; } }
+.specs.wide b small { display: block; font: 400 11.5px var(--font); color: var(--muted); margin-top: 2px; }
+.specs.wide b { font: 600 13px/1.35 var(--font); }
+
+/* asistente guiado y agentes */
+body[data-mode="pick"] #map, body[data-mode="pick"] .leaflet-grab { cursor: crosshair; }
+.gsteps { display: grid; gap: 6px; margin-top: 10px; }
+.gstep { display: flex; gap: 10px; align-items: flex-start; border: 1px solid var(--line); background: var(--panel2); border-radius: 10px; padding: 9px 10px; }
+.gstep > i { width: 24px; height: 24px; border-radius: 50%; flex: none; display: grid; place-items: center; font: 700 12px var(--font); font-style: normal; background: var(--line); color: var(--fg); }
+.gstep b { display: block; } .gstep span { display: block; color: var(--muted); font-size: 13px; margin: 2px 0 4px; }
+.gstep.ok { opacity: .8; } .gstep.ok > i { background: var(--ok); color: #11161c; }
+.gstep.cur { border-color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); } .gstep.cur > i { background: var(--accent); color: #1a1205; }
+.gstep.info > i { background: var(--cyan); color: #11161c; }
+.gstep .row { margin-top: 4px; }
+.plist2.tall { max-height: 52vh; }
+#tabs button small { font-size: 9.5px; }
+
 </style>
 </head>
 <body>
@@ -1375,7 +1416,7 @@ const DEFAULT_CATALOG = [
   { id: "ui-u7-mesh", brand: "Ubiquiti", type: "ap", name: "UniFi U7 Mesh", bands: ["2.4", "5"], eirp: 25, gain: 4, w: 13, power: "poe", price: 199, ver: true, eirpEst: true },
   { id: "ui-u6-mesh", brand: "Ubiquiti", type: "ap", name: "UniFi U6 Mesh", bands: ["2.4", "5"], eirp: 24, gain: 4, w: 12, power: "poe", price: 179, ver: true, eirpEst: true },
   { id: "ui-ac-mesh", brand: "Ubiquiti", type: "ap", name: "UniFi AC Mesh", bands: ["2.4", "5"], eirp: 23, gain: 3, w: 9, power: "poe", price: 99, ver: true, eirpEst: true },
-  { id: "ui-ubb", brand: "Ubiquiti", type: "bridge", name: "UniFi Building Bridge (UBB)", freq: 60, range: 500, w: 7, price: 279, perUnit: true, ver: true, notes: "60 GHz con respaldo 5 GHz; precio por unidad." },
+  { id: "ui-ubb", brand: "Ubiquiti", type: "bridge", name: "UniFi Building Bridge (UBB)", freq: 60, range: 500, w: 7, price: 279, perUnit: true, ver: true, notes: "60 GHz con respaldo 5 GHz; precio por unidad.", capMbps: 1000 },
   { id: "ui-usw-lite-8-poe", brand: "Ubiquiti", type: "switch", name: "UniFi Switch Lite 8 PoE", ports: 8, poePorts: 4, poeBudget: 52, sfp: false, price: 109, ver: false },
   // ---------------- Tapo ----------------
   { id: "tapo-c425-kit", brand: "Tapo", type: "camera", name: "Tapo C425 KIT (solar)", res: [2560, 1440], hfov: 122, ir: 15, det: 6, detEst: true, power: "solar", net: ["wifi24"], ip: "IP66", siren: 94, cloud: true, price: 99.99, ver: true, src: "https://www.tapo.com/au/product/smart-camera/tapo-c425-kit", notes: "Sensor PIR; usuarios reportan ≈ 6 m." },
@@ -1409,11 +1450,11 @@ const DEFAULT_CATALOG = [
   { id: "hik-2xs6a47g1-ls", brand: "Hikvision", type: "camera", name: "Hikvision DS-2XS6A47G1-LS/C36S80 (solar)", res: [2560, 1440], hfov: 105.7, ir: 30, det: 30, detEst: true, power: "solar", net: ["lte"], ip: "IP67", price: 0, ver: false, notes: "Panel 80 W, batería 360 Wh." },
   { id: "hik-7608nxi-k2-8p", brand: "Hikvision", type: "recorder", name: "Hikvision DS-7608NXI-K2/8P", channels: 8, poePorts: 8, poeBudget: 80, views: 9, alarmOut: 1, bays: 2, local: true, price: 320, ver: false, notes: "≈ € 294; 4 entradas y 1 salida de alarma." },
   { id: "hik-7616nxi-k2-16p", brand: "Hikvision", type: "recorder", name: "Hikvision DS-7616NXI-K2/16P", channels: 16, poePorts: 16, poeBudget: 160, views: 16, alarmOut: 1, bays: 2, local: true, price: 0, ver: false },
-  { id: "hik-3wf02-5ac-d", brand: "Hikvision", type: "bridge", name: "Hikvision DS-3WF02-5AC/D (kit)", freq: 5, range: 5000, w: 6, price: 107, ver: false, notes: "€ 98,91 el par; alimenta una cámara por PoE." },
+  { id: "hik-3wf02-5ac-d", brand: "Hikvision", type: "bridge", name: "Hikvision DS-3WF02-5AC/D (kit)", freq: 5, range: 5000, w: 6, price: 107, ver: false, notes: "€ 98,91 el par; alimenta una cámara por PoE.", capMbps: 150 },
   { id: "hik-3e0510p-e", brand: "Hikvision", type: "switch", name: "Hikvision DS-3E0510P-E", ports: 10, poePorts: 8, poeBudget: 110, sfp: true, longReach: 250, price: 0, ver: false },
   // ---------------- TP-Link Omada / VIGI ----------------
   { id: "omada-eap610-outdoor", brand: "TP-Link", type: "ap", name: "Omada EAP610‑Outdoor", bands: ["2.4", "5"], eirp: 27, gain: 4, w: 13, power: "poe", price: 141, ver: true, eirpEst: true },
-  { id: "omada-eap211-bridge", brand: "TP-Link", type: "bridge", name: "Omada EAP211‑Bridge KIT", freq: 5, range: 1000, w: 11.5, price: 139.99, ver: true, notes: "Par preemparejado, 5 GHz." },
+  { id: "omada-eap211-bridge", brand: "TP-Link", type: "bridge", name: "Omada EAP211‑Bridge KIT", freq: 5, range: 1000, w: 11.5, price: 139.99, ver: true, notes: "Par preemparejado, 5 GHz.", capMbps: 200 },
   { id: "omada-oc200", brand: "TP-Link", type: "router", name: "Omada OC200 (controlador)", price: 90, ver: false },
   { id: "omada-er605", brand: "TP-Link", type: "router", name: "Omada ER605 + router 4G", price: 150, ver: false, notes: "Doble WAN con respaldo 4G." },
   { id: "vigi-c340i-4mm", brand: "TP-Link", type: "camera", name: "VIGI C340I 4 mm", res: [2560, 1440], hfov: 75.2, ir: 30, det: 27, detEst: true, power: "poe", w: 5.5, net: ["poe"], ip: "IP67", onvif: true, price: 50, ver: false, notes: "Cruce de línea e intrusión." },
@@ -1424,17 +1465,18 @@ const DEFAULT_CATALOG = [
   { id: "switch-poe-8-sfp", brand: "Genérico", type: "switch", name: "Switch PoE 8 puertos + SFP", ports: 10, poePorts: 8, poeBudget: 120, sfp: true, price: 110, ver: false },
   { id: "siren-120-strobe", brand: "Genérico", type: "siren", name: "Sirena 120 dB con estroboscópica", db: 120, conn: "relay", price: 35, ver: false },
   { id: "relay-12v", brand: "Genérico", type: "actuator", name: "Relé 12 V + fuente", local: true, price: 30, ver: false },
-  { id: "ups-600-cabinet", brand: "Genérico", type: "power", name: "Gabinete IP65 + UPS 600 VA", price: 110, ver: false },
-  { id: "ups-1500", brand: "Genérico", type: "power", name: "UPS 1.500 VA", price: 180, ver: false },
-  { id: "pole-3m", brand: "Genérico", type: "pole", name: "Poste 3 m con herrajes", price: 40, ver: false },
-  { id: "mast-6m", brand: "Genérico", type: "pole", name: "Mástil 6 m", price: 150, ver: false },
-  { id: "monitor-24", brand: "Genérico", type: "display", name: "Monitor 24\" HDMI", price: 110, ver: false },
+  { id: "ups-600-cabinet", brand: "Genérico", type: "power", name: "Gabinete IP65 + UPS 600 VA", price: 110, ver: false, va: 600, wh: 84 },
+  { id: "ups-1500", brand: "Genérico", type: "power", name: "UPS 1.500 VA", price: 180, ver: false, va: 1500, wh: 216 },
+  { id: "pole-3m", brand: "Genérico", type: "pole", name: "Poste 3 m con herrajes", price: 40, ver: false, height: 3 },
+  { id: "mast-6m", brand: "Genérico", type: "pole", name: "Mástil 6 m", price: 150, ver: false, height: 6 },
+  { id: "monitor-24", brand: "Genérico", type: "display", name: "Monitor 24\" HDMI", price: 110, ver: false, inches: 24, w: 25 },
   { id: "generic-camera", brand: "Genérico", type: "camera", name: "Cámara genérica PoE 4MP", res: [2560, 1440], hfov: 90, ir: 30, det: 20, detEst: true, power: "poe", w: 6, net: ["poe"], price: 60, ver: false }
 ];
 /* Materiales de enlace (precio por metro o por extremo) */
 const LINK_MATERIALS = {
   cat6: { perM: 0.5, label: "Cable Cat6 exterior" },
-  fiber: { perM: 0.7, perEnd: 30, label: "Fibra exterior + módulos" }
+  fiber: { perM: 0.7, perEnd: 30, label: "Fibra exterior + módulos" },
+  alarm: { perM: 0.3, label: "Cable de alarma 2×18 AWG" }
 };
 
 /* ---- i18n.js ---- */
@@ -1443,7 +1485,7 @@ const I18N = {
 es: {
   // barra lateral y pestañas
   r_select: "Mover", r_wall: "Muro", r_building: "Edif.", r_tree: "Árbol", r_camera: "Cámara", r_ap: "AP", r_switch: "Switch", r_recorder: "NVR", r_siren: "Sirena", r_router: "Router", r_more: "Más", r_link: "Enlace", r_measure: "Medir",
-  tb_item: "Elemento", tb_project: "Proyecto", tb_analysis: "Análisis", tb_budget: "Costos", tb_ai: "IA", tb_catalog: "Catálogo", tb_settings: "Ajustes",
+  tb_guide: "Guía", agents: "Agentes", tb_item: "Ficha", tb_project: "Proyecto", tb_analysis: "Análisis", tb_budget: "Costos", tb_ai: "IA", tb_catalog: "Catálogo", tb_settings: "Ajustes",
   projects: "Proyectos", variant: "Variante", undo: "Deshacer", redo: "Rehacer", layers: "Capas", export: "Exportar", assistant: "Asistente IA", panel: "Panel",
   // modos
   hint_wall: "Toca el mapa para marcar cada esquina del muro. Toca el primer punto para cerrarlo. Con el Apple Pencil puedes trazarlo a mano.",
@@ -1454,7 +1496,7 @@ es: {
   finish: "Terminar", cancelStep: "Borrar trazo", exitMode: "Salir", linkPickB: "Elige el segundo equipo",
   // tipos
   type_camera: "Cámara", type_ap: "Punto de acceso", type_switch: "Switch", type_recorder: "Grabador / HomeBase", type_router: "Router / controlador", type_siren: "Sirena", type_hub: "Hub / puente de sensores", type_pole: "Poste", type_power: "UPS / energía", type_display: "Monitor", type_actuator: "Activador", type_bridge: "Puente inalámbrico",
-  kind_wifi_inet: "Wi-Fi con internet", kind_wifi_lan: "Wi-Fi intranet", kind_cat6: "Cable de red Cat6", kind_fiber: "Fibra óptica", kind_bridge: "Puente inalámbrico",
+  kind_wifi_inet: "Wi-Fi con internet", kind_wifi_lan: "Wi-Fi intranet", kind_cat6: "Cable de red Cat6", kind_fiber: "Fibra óptica", kind_bridge: "Puente inalámbrico", kind_alarm: "Cable de alarma",
   pw_poe: "PoE", pw_solar: "Solar + batería", pw_battery: "Batería", pw_ac: "Corriente", pw_usb: "USB",
   net_wifi24: "Wi-Fi 2,4 GHz", net_wifi5: "Wi-Fi 5 GHz", net_eth: "Ethernet", net_poe: "PoE", net_lte: "4G",
   q_good: "Buena", q_ok: "Aceptable", q_weak: "Débil", q_none: "Sin señal",
@@ -1512,9 +1554,11 @@ es: {
   notBackup: "No es un respaldo de Atalaya.", notProject: "No es un proyecto de Atalaya.", restored: "Respaldo restaurado: {n} proyectos.", imported: "importado", projectImported: "Proyecto importado.",
   // IA
   aiNoKey: "Falta la clave de Gemini (en Ajustes).", aiNeedKey: "Para usar el asistente agrega tu clave gratuita de Gemini.", aiQuota: "Se alcanzó el límite gratuito de Gemini. Espera un minuto o prueba otro modelo (por ejemplo gemini-2.5-flash-lite).",
-  aiBadKey: "La clave de Gemini no es válida.", aiNoModel: "El modelo «{m}» no existe para tu clave. Pulsa «Ver modelos» en Ajustes.", aiForbidden: "Google rechazó la solicitud", aiUnknown: "error desconocido",
+  aiBadKey: "La clave de Gemini no es válida.", aiNoModel: "El modelo «{m}» no está disponible para tu clave. Pulsa «Ver modelos» en Ajustes y elige uno de la lista.", aiForbidden: "Google rechazó la solicitud", aiUnknown: "error desconocido",
   aiBlocked: "Gemini bloqueó la respuesta.", aiEmpty: "Gemini no devolvió respuesta.", aiTooLong: "La respuesta fue demasiado larga. Pide algo más acotado.", aiNoReply: "Listo.",
-  aiThinking: "Pensando…", aiCapturing: "Capturando la imagen del mapa…", aiCaptureFail: "No pude capturar la imagen del mapa. Agrega tu captura como «Imagen propia» en Proyecto, ajústala y vuelve a intentar.",
+  aiThinking: "Pensando…", aiReceiving: "Recibiendo respuesta ({n} caracteres)", aiStay: "Quédate en la app hasta que termine: si cambias de app, el iPad corta la conexión.",
+  aiNetwork: "No se pudo conectar con Gemini o se cortó la conexión. Revisa internet, prueba con la VPN apagada y quédate en la app mientras responde.",
+  aiModelAuto: "Modelo elegido automáticamente: {m}", testAi: "Probar conexión con Gemini", aiPingOk: "Gemini respondió con {m} en {s} s.", modelAuto: "automático", aiCapturing: "Capturando la imagen del mapa…", aiCaptureFail: "No pude capturar la imagen del mapa. Agrega tu captura como «Imagen propia» en Proyecto, ajústala y vuelve a intentar.",
   aiFromImage: "Detectado en la imagen", aiInvalidActions: "La IA propuso cambios que no pude interpretar.", aiApplied: "{n} cambios aplicados. Puedes deshacerlos.",
   aiTask_layout: "Proponer distribución", aiTask_review: "Revisar diseño", aiTask_satellite: "Leer imagen satelital", aiTask_report: "Redactar informe",
   aiTaskHint: "Escribe indicaciones en el cuadro de abajo antes de pulsar un botón para orientar la tarea. Leer imagen usa lo que se ve ahora en el mapa.",
@@ -1562,7 +1606,7 @@ es: {
 },
 en: {
   r_select: "Move", r_wall: "Wall", r_building: "Bldg.", r_tree: "Tree", r_camera: "Camera", r_ap: "AP", r_switch: "Switch", r_recorder: "NVR", r_siren: "Siren", r_router: "Router", r_more: "More", r_link: "Link", r_measure: "Measure",
-  tb_item: "Item", tb_project: "Project", tb_analysis: "Analysis", tb_budget: "Costs", tb_ai: "AI", tb_catalog: "Catalog", tb_settings: "Settings",
+  tb_guide: "Guide", agents: "Agents", tb_item: "Item", tb_project: "Project", tb_analysis: "Analysis", tb_budget: "Costs", tb_ai: "AI", tb_catalog: "Catalog", tb_settings: "Settings",
   projects: "Projects", variant: "Variant", undo: "Undo", redo: "Redo", layers: "Layers", export: "Export", assistant: "AI assistant", panel: "Panel",
   hint_wall: "Tap the map at each corner of the wall. Tap the first point to close it. With Apple Pencil you can draw it freehand.",
   hint_building: "Tap the building corners, then the first point to close it.",
@@ -1571,7 +1615,7 @@ en: {
   hint_overlay: "Drag the two corners to fit your image on the map.",
   finish: "Finish", cancelStep: "Clear stroke", exitMode: "Exit", linkPickB: "Pick the second device",
   type_camera: "Camera", type_ap: "Access point", type_switch: "Switch", type_recorder: "Recorder / HomeBase", type_router: "Router / controller", type_siren: "Siren", type_hub: "Hub / sensor bridge", type_pole: "Pole", type_power: "UPS / power", type_display: "Monitor", type_actuator: "Trigger", type_bridge: "Wireless bridge",
-  kind_wifi_inet: "Wi-Fi with internet", kind_wifi_lan: "Wi-Fi intranet", kind_cat6: "Cat6 network cable", kind_fiber: "Optical fiber", kind_bridge: "Wireless bridge",
+  kind_wifi_inet: "Wi-Fi with internet", kind_wifi_lan: "Wi-Fi intranet", kind_cat6: "Cat6 network cable", kind_fiber: "Optical fiber", kind_bridge: "Wireless bridge", kind_alarm: "Alarm cable",
   pw_poe: "PoE", pw_solar: "Solar + battery", pw_battery: "Battery", pw_ac: "Mains", pw_usb: "USB",
   net_wifi24: "Wi-Fi 2.4 GHz", net_wifi5: "Wi-Fi 5 GHz", net_eth: "Ethernet", net_poe: "PoE", net_lte: "4G",
   q_good: "Good", q_ok: "Fair", q_weak: "Weak", q_none: "No signal",
@@ -1622,7 +1666,9 @@ en: {
   aiNoKey: "Gemini key missing (in Settings).", aiNeedKey: "Add your free Gemini key to use the assistant.", aiQuota: "Gemini free limit reached. Wait a minute or try another model (e.g. gemini-2.5-flash-lite).",
   aiBadKey: "The Gemini key is not valid.", aiNoModel: "Model “{m}” is not available for your key. Tap “List models” in Settings.", aiForbidden: "Google rejected the request", aiUnknown: "unknown error",
   aiBlocked: "Gemini blocked the answer.", aiEmpty: "Gemini returned no answer.", aiTooLong: "The answer was too long. Ask for something narrower.", aiNoReply: "Done.",
-  aiThinking: "Thinking…", aiCapturing: "Capturing the map image…", aiCaptureFail: "Could not capture the map image. Add your screenshot as “Own image” in Project, fit it and try again.",
+  aiThinking: "Thinking…", aiReceiving: "Receiving answer ({n} characters)", aiStay: "Stay in the app until it finishes: switching apps makes the iPad drop the connection.",
+  aiNetwork: "Could not reach Gemini or the connection dropped. Check the internet, try with the VPN off and stay in the app while it answers.",
+  aiModelAuto: "Model picked automatically: {m}", testAi: "Test Gemini connection", aiPingOk: "Gemini answered with {m} in {s} s.", modelAuto: "automatic", aiCapturing: "Capturing the map image…", aiCaptureFail: "Could not capture the map image. Add your screenshot as “Own image” in Project, fit it and try again.",
   aiFromImage: "Detected in the image", aiInvalidActions: "The AI proposed changes I could not read.", aiApplied: "{n} changes applied. You can undo them.",
   aiTask_layout: "Propose layout", aiTask_review: "Review design", aiTask_satellite: "Read satellite image", aiTask_report: "Write report",
   aiTaskHint: "Type guidance in the box below before tapping a button to steer the task. Read image uses what the map shows now.",
@@ -1776,7 +1822,7 @@ const Catalog = {
 
 /* ---------- Ajustes ---------- */
 const Settings = {
-  v: { lang: "es", geminiKey: "", geminiModel: "gemini-2.5-flash", base: "esri", wallLoss: 8, buildingLoss: 15, routing: 1.15, elev: true },
+  v: { lang: "es", geminiKey: "", geminiModel: "", base: "esri", wallLoss: 8, buildingLoss: 15, routing: 1.15, elev: true },
   async load() { try { const s = await DB.get("kv", "settings"); if (s) Object.assign(this.v, s); } catch (e) {} },
   async save() { try { await DB.set("kv", "settings", this.v); } catch (e) {} }
 };
@@ -1834,7 +1880,8 @@ function newProject(name, center, zoom = 18) {
 /* ---------- Avisos breves ---------- */
 function toast(msg, kind = "") {
   const el = document.createElement("div"); el.className = "toast " + kind; el.textContent = msg;
-  $("#toasts").appendChild(el); setTimeout(() => el.classList.add("out"), 3200); setTimeout(() => el.remove(), 3700);
+  const box = $("#toasts"); box.appendChild(el); while (box.children.length > 3) box.firstElementChild.remove();
+  setTimeout(() => el.classList.add("out"), 3600); setTimeout(() => el.remove(), 4100);
 }
 
 /* ---- analysis.js ---- */
@@ -1844,7 +1891,8 @@ const KIND_RULES = {
   wifi_lan: { color: "#8fb8ff", dash: "2 6", wireless: true },
   cat6: { color: "#4b8df8", dash: null, cable: true },
   fiber: { color: "#ff9a3c", dash: null, cable: true },
-  bridge: { color: "#e05bd0", dash: "10 5", wireless: true }
+  bridge: { color: "#e05bd0", dash: "10 5", wireless: true },
+  alarm: { color: "#ef5b5b", dash: "1 5", cable: true, signal: true }
 };
 const DORI = { det: 25, obs: 63, rec: 125, id: 250 }; // píxeles por metro (IEC 62676-4)
 
@@ -1969,7 +2017,7 @@ function analyze() {
     gaps: gaps.filter(g => g.s1 - g.s0 >= 2).map(g => ({ ...g, len: round(g.s1 - g.s0 + 1), ll: g.pts.map(p => Geo.toLL(p)) })),
     warnings: [], links: {}, bom: null
   };
-  checkLinks(res); checkPower(res); checkSystem(res);
+  checkLinks(res); checkPower(res); checkSystem(res); checkPro(res);
   res.bom = bom();
   S.analysis = res; return res;
 }
@@ -1993,12 +2041,14 @@ function wifiEstimate(l) {
   const isAP = d => ["ap", "router", "recorder", "hub"].includes(d.type) && model(d).bands;
   const ap = isAP(a) ? a : isAP(b) ? b : (a.type === "ap" ? a : b), cl = ap === a ? b : a;
   const am = model(ap), cm = model(cl);
-  const use5 = (am.bands || ["2.4"]).includes("5") && (cm.net || []).includes("wifi5") && cl.type !== "ap";
-  const f = cl.type === "ap" ? 5 : (use5 ? 5 : 2.4);
+  const can5 = (am.bands || ["2.4"]).includes("5") && ((cm.net || []).includes("wifi5") || cl.type === "ap");
+  const can24 = cl.type !== "ap" || !can5;
   const d = Geo.dist(a.pos, b.pos), cr = crossings(a.pos, b.pos);
-  const loss = fspl(d, f) + cr.walls * Settings.v.wallLoss + cr.bld * Settings.v.buildingLoss + (f === 5 ? 3 : 0);
   const eirp = am.eirp || 23, gain = am.gain || 3, client = cl.type === "ap" ? (am.eirp || 23) : 17;
-  const rssi = Math.min(eirp - loss, client + gain - loss);
+  const at = f => { const loss = fspl(d, f) + cr.walls * Settings.v.wallLoss + cr.bld * Settings.v.buildingLoss + (f === 5 ? 3 : 0); return Math.min(eirp - loss, client + gain - loss); };
+  // la cámara se queda con la banda que llega mejor (2,4 GHz alcanza más; 5 GHz tiene más capacidad)
+  let f = can24 ? 2.4 : 5, rssi = at(f);
+  if (can5 && can24 && at(5) >= -65) { f = 5; rssi = at(5); }
   return { f, d, rssi: round(rssi), walls: cr.walls, bld: cr.bld, q: rssi >= -65 ? "good" : rssi >= -70 ? "ok" : rssi >= -80 ? "weak" : "none" };
 }
 function checkLinks(res) {
@@ -2011,6 +2061,9 @@ function checkLinks(res) {
       const lr = Math.max(model(a).longReach || 0, model(b).longReach || 0);
       if (run > 100 && !(lr && run <= lr)) W.push({ lvl: "bad", id: l.id, msg: t("wCat6", { n: round(run), a: a.name, b: b.name }) });
       else if (run > 90) W.push({ lvl: "warn", id: l.id, msg: t("wCat6near", { n: round(run), a: a.name, b: b.name }) });
+    } else if (l.kind === "alarm") {
+      info.run = L * Settings.v.routing + (a.mountH || 0) + (b.mountH || 0);
+      if (info.run > 300) W.push({ lvl: "warn", id: l.id, msg: L2(`Cable de alarma de ${round(info.run)} m entre ${a.name} y ${b.name}: usa cable 2×16 AWG o un relé de red cerca de la sirena.`, `${round(info.run)} m alarm cable between ${a.name} and ${b.name}: use 2×16 AWG cable or a network relay near the siren.`) });
     } else if (l.kind === "fiber") {
       info.run = L * Settings.v.routing;
       if (info.run > 550) W.push({ lvl: "warn", id: l.id, msg: t("wFiber", { n: round(info.run) }) });
@@ -2086,16 +2139,19 @@ function bom() {
     const m = model(d); add(m.id || d.model, m.name || d.model, 1, m.price || 0, !!m.ver);
     if (d.actuator) { const a = Catalog.get(d.actuator); if (a) add(a.id, a.name, 1, a.price || 0, !!a.ver); }
   });
-  let cat = 0, fib = 0, fibLinks = 0;
+  let cat = 0, fib = 0, fibLinks = 0, alm = 0;
   V.links.forEach(l => {
     const L = linkLength(l);
     if (l.kind === "cat6") cat += L * Settings.v.routing + (S.dev(l.a)?.mountH || 0) + (S.dev(l.b)?.mountH || 0);
     if (l.kind === "fiber") { fib += L * Settings.v.routing; fibLinks++; }
+    if (l.kind === "alarm") alm += L * Settings.v.routing + (S.dev(l.a)?.mountH || 0) + (S.dev(l.b)?.mountH || 0);
     if (l.kind === "bridge") { const bm = Catalog.get(l.model) || Catalog.get("omada-eap211-bridge"); if (bm) add(bm.id, bm.name, bm.perUnit ? 2 : 1, bm.price || 0, !!bm.ver); }
   });
+  bomPro(add);
   if (cat) add("cat6", LINK_MATERIALS.cat6.label + " (m)", Math.ceil(cat), LINK_MATERIALS.cat6.perM, false);
   if (fib) add("fiber", LINK_MATERIALS.fiber.label + " (m)", Math.ceil(fib), LINK_MATERIALS.fiber.perM, false);
   if (fibLinks) add("fiber-end", t("fiberEnds"), fibLinks * 2, LINK_MATERIALS.fiber.perEnd, false);
+  if (alm) add("alarm", L2(LINK_MATERIALS.alarm.label, "Alarm cable 2×18 AWG") + " (m)", Math.ceil(alm), LINK_MATERIALS.alarm.perM, false);
   const list = Object.values(rows).map(r => ({ ...r, total: r.qty * r.unit }));
   const eq = list.reduce((s, r) => s + r.total, 0), st = P.settings;
   const labor = eq * (st.labor ?? 0.2), cont = (eq + labor) * (st.contingency ?? 0.1), total = eq + labor + cont;
@@ -2149,6 +2205,396 @@ async function linkProfile(l) {
   return res;
 }
 
+/* ---- pro.js ---- */
+/* ===== Lógica técnica: tipo de red, alcances y requisitos por equipo ===== */
+const L2 = (es, en) => (Settings.v.lang === "en" ? en : es);
+const ALL_KINDS = ["wifi_inet", "wifi_lan", "cat6", "fiber", "bridge"];
+
+/* ---------- Tipos de red ---------- */
+const NETWORKS = {
+  intranet: { allowed: ["wifi_lan", "cat6", "fiber", "bridge"], internet: false, cam: "tapo-c320ws", rec: "vigi-nvr4032h",
+    name: () => L2("Wi-Fi intranet (sin internet)", "Wi-Fi intranet (no internet)"),
+    desc: () => L2("Cámaras Wi-Fi hacia puntos de acceso y un grabador local. Funciona aunque se caiga internet, pero no hay avisos al teléfono fuera del conjunto.", "Wi-Fi cameras to access points and a local recorder. Works without internet, but no phone alerts outside the site.") },
+  internet: { allowed: ["wifi_inet", "wifi_lan", "cat6", "fiber", "bridge"], internet: true, cam: "tapo-c460-kit", rec: "tapo-h500",
+    name: () => L2("Wi-Fi con internet", "Wi-Fi with internet"),
+    desc: () => L2("Cámaras Wi-Fi con app en la nube: avisos al teléfono y vista remota. Si se cae internet se pierden avisos y automatizaciones.", "Wi-Fi cameras with a cloud app: phone alerts and remote view. If internet drops, alerts and automations stop.") },
+  cable: { allowed: ["cat6", "fiber"], cam: "vigi-c340i-4mm", rec: "vigi-nvr4032h",
+    name: () => L2("Cableada (Cat6 y PoE)", "Wired (Cat6 and PoE)"),
+    desc: () => L2("Cámaras PoE con cable de red a switches y grabador. Lo más estable; exige tender cable (máx. 100 m por tramo).", "PoE cameras cabled to switches and a recorder. Most stable; needs cable runs (100 m max per run).") },
+  hybrid: { name: () => L2("Híbrida", "Hybrid"), desc: () => "" }
+};
+const HYBRIDS = {
+  fiber_poe: { allowed: ["fiber", "cat6"], cam: "vigi-c340i-4mm", rec: "vigi-nvr4032h",
+    name: () => L2("Troncal de fibra + cámaras PoE", "Fiber backbone + PoE cameras"),
+    desc: () => L2("Fibra óptica de la caseta a nodos del perímetro; desde cada nodo, Cat6 con PoE a las cámaras. Para distancias largas y zonas con rayos.", "Fiber from the guard house to perimeter nodes; Cat6 PoE from each node to cameras. For long runs and lightning-prone areas.") },
+  cable_wifi: { allowed: ["cat6", "fiber", "wifi_lan", "wifi_inet"], cam: "tapo-c460-kit", rec: "tapo-h500",
+    name: () => L2("Troncal cableada + cámaras Wi-Fi", "Wired backbone + Wi-Fi cameras"),
+    desc: () => L2("Cable a puntos de acceso exteriores repartidos por el perímetro; las cámaras se conectan por Wi-Fi al AP más cercano.", "Cable to outdoor access points around the perimeter; cameras join the nearest AP over Wi-Fi.") },
+  bridge_poe: { allowed: ["bridge", "cat6", "fiber"], cam: "vigi-c340i-4mm", rec: "vigi-nvr4032h",
+    name: () => L2("Puentes inalámbricos + nodos PoE", "Wireless bridges + PoE nodes"),
+    desc: () => L2("Puentes punto a punto desde la caseta a nodos lejanos; en cada nodo, switch PoE y cámaras por cable. Evita zanjas largas.", "Point-to-point bridges from the guard house to remote nodes; PoE switch and cabled cameras at each node. Avoids long trenches.") },
+  solar_wifi: { allowed: ["wifi_lan", "wifi_inet", "bridge", "cat6"], cam: "tapo-c460-kit", rec: "tapo-h500",
+    name: () => L2("Cámaras solares Wi-Fi + AP enlazados", "Solar Wi-Fi cameras + linked APs"),
+    desc: () => L2("Cámaras con panel solar (sin cable de energía) conectadas a puntos de acceso, que se enlazan por cable o puente.", "Solar cameras (no power cable) on access points linked by cable or bridge.") },
+  mixed: { allowed: ALL_KINDS, cam: null,
+    name: () => L2("Mixta (todas las conexiones)", "Mixed (all link types)"),
+    desc: () => L2("Sin restricciones: la app no limita los tipos de enlace.", "No restrictions on link types.") }
+};
+function netDef(P = S.project) {
+  const n = P?.network || { type: "hybrid", hybrid: "mixed", internet: true, unset: true };
+  const base = n.type === "hybrid" ? (HYBRIDS[n.hybrid] || HYBRIDS.mixed) : (NETWORKS[n.type] || HYBRIDS.mixed);
+  const internet = n.type === "intranet" ? false : n.type === "internet" ? true : n.internet !== false;
+  const allowed = base.allowed.filter(k => internet || k !== "wifi_inet").concat("alarm");
+  return { type: n.type, hybrid: n.hybrid, internet, allowed, cam: base.cam, rec: base.rec, unset: !!n.unset,
+    label: (n.type === "hybrid" ? L2("Híbrida", "Hybrid") + " · " : "") + base.name(), desc: base.desc() };
+}
+function applyNetworkDefaults() { const n = netDef(); if (n.cam && Catalog.get(n.cam)) LAST_MODEL.camera = n.cam; if (n.rec && Catalog.get(n.rec)) LAST_MODEL.recorder = n.rec; }
+function networkDialog(P, onDone) {
+  const n = P.network || { type: "cable", hybrid: "fiber_poe", internet: true };
+  const card = (k, d) => `<label class="ncard"><input type="radio" name="nt" value="${k}" ${n.type === k ? "checked" : ""}><span><b>${d.name()}</b><small>${d.desc()}</small></span></label>`;
+  const body = `<p class="muted small">${L2("Define cómo se conectará el sistema. La app ajusta los enlaces por defecto, los modelos sugeridos y las advertencias. Puedes cambiarlo luego en Proyecto.", "Choose how the system connects. The app adapts default links, suggested models and warnings. You can change it later in Project.")}</p>
+    <div class="ncards">${["intranet", "internet", "cable", "hybrid"].map(k => card(k, NETWORKS[k])).join("")}</div>
+    <div id="hyb" class="hyb ${n.type === "hybrid" ? "" : "dim"}"><h3>${L2("Tipo de red híbrida", "Hybrid type")}</h3>${Object.entries(HYBRIDS).map(([k, d]) => `<label class="ncard sm"><input type="radio" name="hy" value="${k}" ${(n.hybrid || "fiber_poe") === k ? "checked" : ""}><span><b>${d.name()}</b><small>${d.desc()}</small></span></label>`).join("")}</div>
+    <label class="fld chk" id="inetrow"><input type="checkbox" id="n_inet" ${n.internet !== false ? "checked" : ""}> <span>${L2("Con salida a internet (vista remota y avisos al teléfono)", "With internet access (remote view and phone alerts)")}</span></label>`;
+  const d = dialog({ title: L2("Tipo de red del sistema", "System network type"), wide: true, body, actions: [{ label: t("cancel"), onClick: () => { if (!P.network) { P.network = { type: "hybrid", hybrid: "mixed", internet: true }; commit("network"); } } }, { label: t("save"), kind: "pri", onClick: bg => {
+    const type = $("input[name=nt]:checked", bg)?.value || "cable", hybrid = $("input[name=hy]:checked", bg)?.value || "mixed";
+    P.network = { type, hybrid: type === "hybrid" ? hybrid : null, internet: type === "intranet" ? false : type === "internet" ? true : $("#n_inet", bg).checked };
+    applyNetworkDefaults(); commit("network"); toast(L2("Red: ", "Network: ") + netDef(P).label, "ok"); onDone?.();
+  } }] });
+  const sync = () => { const ty = $("input[name=nt]:checked", d.el)?.value; $("#hyb", d.el).classList.toggle("dim", ty !== "hybrid"); $("#inetrow", d.el).classList.toggle("dim", ty === "intranet" || ty === "internet"); };
+  d.el.addEventListener("change", sync); sync();
+}
+
+/* ---------- Cálculos de alcance ---------- */
+function freeRange(budget, fGHz, thr = -70) { const extra = fGHz >= 5 ? 3 : 0; return Math.pow(10, (budget - thr - extra - 32.44 - 20 * Math.log10(fGHz * 1000)) / 20) * 1000; }
+// alcance hacia cámaras cliente: margen de 10 dB para el valor práctico
+function apRanges(m) {
+  const B = Math.min(m.eirp || 23, 17 + (m.gain || 3));
+  return (m.bands || ["2.4"]).filter(b => b !== "6").map(b => ({ band: b, los: freeRange(B, +b), practical: freeRange(B - 10, +b), wall: freeRange(B - 10 - Settings.v.wallLoss, +b) }));
+}
+const GENERIC_AP = { eirp: 23, gain: 3, bands: ["2.4", "5"] };
+function camMbps(d) { const m = model(d), mp = m.res ? m.res[0] * m.res[1] / 1e6 : 2; let r = mp <= 2.2 ? 2 : mp <= 4.3 ? 3 : mp <= 6.5 ? 4 : mp <= 9 ? 6 : 10; if (m.dual) r *= 2; return r; }
+const eventOnly = d => ["solar", "battery"].includes(model(d).power);
+const camAvgMbps = d => eventOnly(d) ? 0.3 : camMbps(d);   // promedio para disco
+const camPeakMbps = d => eventOnly(d) ? camMbps(d) * 0.5 : camMbps(d); // carga simultánea para Wi-Fi y puentes
+const hasSD = d => ["Tapo", "EZVIZ"].includes(model(d).brand);
+const isRadio = d => d.type === "ap" || (model(d).bands || []).length > 0;
+const wifiOnly = d => { const n = model(d).net || []; return n.some(x => x.startsWith("wifi")) && !n.includes("poe") && !n.includes("eth"); };
+const poeCapable = d => (model(d).poePorts || 0) > 0;
+const sirenDist = (db, lvl) => Math.pow(10, (db - lvl) / 20);
+const cableRun = (a, b) => Geo.dist(a.pos, b.pos) * Settings.v.routing + (a.mountH || 0) + (b.mountH || 0);
+const cableReach = d => Math.max(10, (100 - 2 * (d.mountH || 2)) / Settings.v.routing);
+
+/* ---------- Grafo de enlaces ---------- */
+function graph() { const g = {}; S.variant.links.forEach(l => { (g[l.a] ||= []).push({ to: l.b, l }); (g[l.b] ||= []).push({ to: l.a, l }); }); return g; }
+function findPath(fromId, pred, g = graph(), skip) {
+  const seen = new Set([fromId]), q = [[fromId, 0]];
+  while (q.length) { const [id, n] = q.shift(); for (const e of g[id] || []) { if (e.l === skip || seen.has(e.to)) continue; seen.add(e.to); const d = S.dev(e.to); if (!d) continue; if (pred(d)) return { dev: d, hops: n + 1 }; q.push([e.to, n + 1]); } }
+  return null;
+}
+function component(fromId, g, skip) { const seen = new Set([fromId]), q = [fromId]; while (q.length) { const id = q.shift(); for (const e of g[id] || []) if (e.l !== skip && !seen.has(e.to)) { seen.add(e.to); q.push(e.to); } } return seen; }
+const linksOf = (d, kinds) => S.variant.links.filter(l => (l.a === d.id || l.b === d.id) && (!kinds || kinds.includes(l.kind)));
+const other = (l, d) => S.dev(l.a === d.id ? l.b : l.a);
+function poeFed(sw) { return linksOf(sw, ["cat6"]).map(l => other(l, sw)).filter(x => x && poeW(x) > 0 && poeCapable(sw)); }
+function cameraRecorder(c, g) {
+  const r = findPath(c.id, d => d.type === "recorder", g); if (!r) return null;
+  const cm = model(c), rm = model(r.dev);
+  return { rec: r.dev, compat: cm.brand === rm.brand || cm.onvif || rm.brand === "Genérico" || cm.brand === "Genérico" };
+}
+function recorderStats(rec, g = graph()) {
+  const cams = S.variant.devices.filter(d => d.type === "camera" && cameraRecorder(d, g)?.rec.id === rec.id), m = model(rec);
+  const tb = rec.hddTB ?? (m.bays ? m.bays * 4 : 0.256);
+  const perDay = cams.reduce((s, c) => s + camAvgMbps(c), 0) * 10.8; // GB/día
+  return { cams, tb, perDay, days: perDay ? tb * 1000 * 0.93 / perDay : Infinity, channels: m.channels || 0 };
+}
+function apStats(ap) {
+  const bands = {};
+  linksOf(ap, ["wifi_lan", "wifi_inet"]).forEach(l => { const c = other(l, ap); if (!c || c.type !== "camera") return; const e = wifiEstimate(l); const b = e ? String(e.f) : "2.4"; (bands[b] ||= { n: 0, mbps: 0 }); bands[b].n++; bands[b].mbps += camPeakMbps(c); });
+  const cap = { "2.4": 40, "5": 150 };
+  return Object.entries(bands).map(([b, v]) => ({ band: b, ...v, cap: cap[b] || 100, pct: v.mbps / (cap[b] || 100) }));
+}
+function bridgeStats(l) {
+  const g = graph(), A = component(l.a, g, l), B = component(l.b, g, l);
+  const hasRec = set => [...set].some(id => S.dev(id)?.type === "recorder");
+  const far = hasRec(A) && !hasRec(B) ? B : hasRec(B) && !hasRec(A) ? A : (A.size < B.size ? A : B);
+  const mbps = [...far].map(id => S.dev(id)).filter(d => d?.type === "camera").reduce((s, c) => s + camPeakMbps(c), 0);
+  const bm = Catalog.get(l.model) || Catalog.get("omada-eap211-bridge") || {};
+  return { mbps, cap: bm.capMbps || 100, pct: mbps / (bm.capMbps || 100) };
+}
+function deviceLoadW(d, g) {
+  const m = model(d), poe = () => poeFed(d).reduce((s, x) => s + poeW(x), 0) / 0.9;
+  if (d.type === "switch") return 8 + poe();
+  if (d.type === "recorder") return 25 + poe();
+  if (d.type === "router") return 10;
+  if (d.type === "hub") return 4;
+  if (d.type === "display") return m.w || 25;
+  if (d.type === "ap") return linksOf(d, ["cat6"]).some(l => poeCapable(other(l, d) || {})) ? 0 : (m.w || 12);
+  return 0;
+}
+function upsStats(u) {
+  const near = S.variant.devices.filter(d => d !== u && !["camera", "pole", "power", "siren"].includes(d.type) && Geo.dist(d.pos, u.pos) <= 5);
+  const load = near.reduce((s, d) => s + deviceLoadW(d), 0), wh = model(u).wh || 100;
+  return { near, load, wh, min: load ? wh * 0.8 / load * 60 : Infinity };
+}
+const nearUPS = d => S.variant.devices.some(u => u.type === "power" && Geo.dist(u.pos, d.pos) <= 5);
+
+/* ---------- Postes: instalación y materiales ---------- */
+const MATERIALS = {
+  concrete: { es: "Concreto premezclado (saco 40 kg)", en: "Premixed concrete (40 kg bag)", price: 8 },
+  anchors: { es: "Placa base + 4 pernos químicos M12", en: "Base plate + 4 M12 chemical anchors", price: 25 },
+  wallkit: { es: "Abrazaderas de pared con pernos", en: "Wall brackets with bolts", price: 20 },
+  ground: { es: "Puesta a tierra (barra 1,5 m + cable 6 AWG)", en: "Grounding (1.5 m rod + 6 AWG wire)", price: 35 },
+  guy: { es: "Kit de vientos (3 tensores y anclas)", en: "Guy wire kit (3 tensioners and anchors)", price: 40 }
+};
+function poleSpec(d) {
+  const H = model(d).height || 3, inst = d.install || (H >= 5 ? "buried" : "plate"), out = { H, inst, rows: [], mats: {} };
+  const carries = S.variant.devices.some(x => x !== d && x.type !== "pole" && Geo.dist(x.pos, d.pos) <= 1.5);
+  if (inst === "buried") {
+    const depth = Math.max(0.6, round(0.1 * H + 0.6, 1)), dia = H <= 4 ? 0.3 : H <= 7 ? 0.4 : 0.5;
+    const vol = Math.PI * (dia / 2) ** 2 * depth, bags = Math.ceil(vol / 0.018 * 1.1);
+    out.rows.push([L2("Hoyo", "Hole"), `Ø ${fmt(dia * 100)} cm × ${fmt(depth, 1)} m ${L2("de profundidad", "deep")}`],
+      [L2("Largo total del tubo", "Total pole length"), `${fmt(H + depth, 1)} m (${fmt(H)} m ${L2("libres", "above ground")})`],
+      [L2("Concreto", "Concrete"), `${fmt(vol, 2)} m³ ≈ ${bags} ${L2("sacos de 40 kg", "40 kg bags")}`],
+      [L2("Fraguado", "Curing"), L2("7 días antes de colgar equipos pesados", "7 days before mounting heavy gear")]);
+    out.mats.concrete = bags;
+  } else if (inst === "plate") {
+    out.rows.push([L2("Base", "Base"), L2("Placa de acero 25 × 25 cm, 4 pernos químicos M12 × 120 mm", "25 × 25 cm steel plate, 4 M12 × 120 mm chemical anchors")],
+      [L2("Soporte", "Support"), L2("Losa o pared de concreto de 15 cm o más; si no hay, vaciar un dado de 40 × 40 × 40 cm (≈ 4 sacos)", "Concrete slab or wall 15 cm+; otherwise pour a 40 × 40 × 40 cm footing (≈ 4 bags)")]);
+    out.mats.anchors = 1;
+  } else {
+    out.rows.push([L2("Fijación", "Mounting"), L2("2 abrazaderas separadas ≥ 1 m, pernos M10 de expansión", "2 brackets ≥ 1 m apart, M10 expansion bolts")],
+      [L2("Pared", "Wall"), L2("Sólida: concreto o bloque relleno. No en bloque hueco", "Solid: concrete or filled block. Not hollow block")]);
+    out.mats.wallkit = 1;
+    if (H > 4) out.warn = L2("A pared solo se recomiendan postes de hasta 4 m.", "Wall mounting is only advised up to 4 m.");
+  }
+  if (H >= 6) { out.rows.push([L2("Viento", "Wind"), L2("A partir de 6 m: vientos con 3 tensores o mástil reforzado", "From 6 m: 3 guy wires or a reinforced mast")]); out.mats.guy = 1; }
+  if (carries || H >= 5) { out.rows.push([L2("Puesta a tierra", "Grounding"), L2("Barra de cobre de 1,5 m y cable 6 AWG al poste (protección contra rayos)", "1.5 m copper rod and 6 AWG wire to the pole (lightning)")]); out.mats.ground = 1; }
+  return out;
+}
+
+/* ---------- Mejor conexión para un equipo ---------- */
+function bestUplink(d) {
+  const N = netDef(), V = S.variant, g = graph(), ok = k => N.allowed.includes(k);
+  const others = V.devices.filter(x => x !== d);
+  const pick = (cands, score) => cands.map(x => ({ x, s: score(x) })).filter(o => o.s != null).sort((a, b) => a.s - b.s)[0]?.x;
+  const usedPoe = sw => poeFed(sw).length;
+  if (d.type === "camera" || d.type === "siren") {
+    const m = model(d);
+    if (d.type === "siren" && (m.conn === "relay" || Catalog.get(d.actuator)?.id === "relay-12v")) {
+      const r = pick(others.filter(x => (model(x).alarmOut || 0) > 0 && x.type === "recorder"), x => Geo.dist(x.pos, d.pos));
+      return r && { target: r, kind: "alarm", note: L2("cable de alarma a la salida del grabador", "alarm cable to the recorder output") };
+    }
+    const wantsCable = (m.net || []).includes("poe") || m.conn === "poe";
+    const canWifi = (m.net || []).some(n => n.startsWith("wifi"));
+    if (wantsCable && ok("cat6")) {
+      const sw = pick(others.filter(x => poeCapable(x) && usedPoe(x) < (model(x).poePorts || 0)), x => { const r = cableRun(x, d); return r <= 100 ? r : null; });
+      if (sw) return { target: sw, kind: "cat6", note: `Cat6 ≈ ${fmt(cableRun(sw, d))} m` };
+    }
+    if (canWifi) {
+      const kind = N.internet && ok("wifi_inet") && m.cloud ? "wifi_inet" : ok("wifi_lan") ? "wifi_lan" : ok("wifi_inet") ? "wifi_inet" : null;
+      if (kind) {
+        let best = null;
+        others.filter(isRadio).forEach(r => { const e = wifiEstimate({ a: r.id, b: d.id, kind }); if (e && e.rssi >= -80 && (!best || e.rssi > best.e.rssi)) best = { r, e }; });
+        if (best) return { target: best.r, kind, note: `${best.e.rssi} dBm · ${best.e.f} GHz` };
+      }
+    }
+    if ((m.net || []).includes("eth") && ok("cat6")) {
+      const sw = pick(others.filter(x => ["switch", "router", "recorder"].includes(x.type)), x => { const r = cableRun(x, d); return r <= 100 ? r : null; });
+      if (sw) return { target: sw, kind: "cat6", note: `Cat6 ≈ ${fmt(cableRun(sw, d))} m` };
+    }
+    return null;
+  }
+  const core = x => ["switch", "router", "recorder"].includes(x.type);
+  if (["ap", "switch", "recorder", "router", "hub"].includes(d.type)) {
+    const targets = d.type === "recorder" ? others.filter(x => x.type === "router" || x.type === "switch") : d.type === "router" ? others.filter(x => x.type === "recorder" || x.type === "switch") : others.filter(core);
+    const near = pick(targets, x => Geo.dist(x.pos, d.pos));
+    if (!near) return null;
+    const run = cableRun(near, d), wantsPoe = d.type === "ap" && poeCapable(near);
+    if (run <= 100 && ok("cat6")) return { target: near, kind: "cat6", note: `Cat6 ≈ ${fmt(run)} m${wantsPoe ? " · PoE" : ""}` };
+    if (run <= 10000 && ok("fiber") && d.type !== "ap") return { target: near, kind: "fiber", note: L2("fibra", "fiber") + ` ≈ ${fmt(Geo.dist(near.pos, d.pos) * Settings.v.routing)} m` };
+    if (ok("bridge")) return { target: near, kind: "bridge", note: L2("puente", "bridge") + ` ${fmt(Geo.dist(near.pos, d.pos))} m` };
+    return null;
+  }
+  return null;
+}
+function autoLink(d, silent) {
+  const b = bestUplink(d); if (!b) { if (!silent) toast(L2("No encontré a qué conectarlo: agrega primero el equipo de red.", "Nothing to connect to: add the network device first."), "warn"); return null; }
+  const l = { id: uid("l"), a: b.target.id, b: d.id, kind: b.kind }; if (b.kind === "bridge") l.model = "omada-eap211-bridge";
+  S.variant.links.push(l);
+  toast(L2(`Conectado a ${b.target.name} · ${t("kind_" + b.kind)} (${b.note})`, `Connected to ${b.target.name} · ${t("kind_" + b.kind)} (${b.note})`), "ok");
+  return l;
+}
+
+/* ---------- Ficha técnica y requisitos de cada equipo ---------- */
+// fila: { ok: true|false|null, title, detail, fix? }
+function deviceSheet(d) {
+  const m = model(d), N = netDef(), g = graph(), rows = [], specs = [], add = (ok, title, detail, fix) => rows.push({ ok, title, detail, fix });
+  const fixLink = () => ({ label: L2("Conectar automáticamente", "Connect automatically"), run: () => { if (autoLink(d)) commit("autolink"); } });
+  const lk = linksOf(d);
+  if (d.type === "camera") {
+    const r = camRanges(d), lens = (m.name.match(/(\d+(?:[.,]\d+)?)\s*mm/) || [])[1];
+    specs.push([L2("Lente y ángulo", "Lens and angle"), (lens ? lens + " mm · " : "") + fmt(r.fov) + "°"], [t("detection"), fmt(r.det) + " m" + (m.detEst ? " *" : "")],
+      [t("recognition"), fmt(r.rec, 1) + " m"], [t("identification"), fmt(r.id, 1) + " m"], [L2("Visión nocturna", "Night vision"), m.ir ? fmt(m.ir) + " m" : "—"],
+      [t("power"), t("pw_" + (m.power || "ac")) + (m.w ? ` · ${m.w} W` : "")], [t("network"), (m.net || []).map(n => t("net_" + n)).join(", ") || "—"],
+      [L2("Tráfico de video", "Video bitrate"), eventOnly(d) ? L2(`solo al detectar (≈ ${camMbps(d)} Mbps)`, `on events only (≈ ${camMbps(d)} Mbps)`) : `≈ ${camMbps(d)} Mbps (H.265)`]);
+    if (m.ip) specs.push([L2("Protección", "Protection"), m.ip]);
+    if (m.siren) specs.push([L2("Sirena integrada", "Built-in siren"), m.siren + " dB"]);
+    // energía
+    const fedBy = lk.filter(l => l.kind === "cat6").map(l => other(l, d)).find(x => x && poeCapable(x));
+    if (m.power === "poe" && !fedBy && d.injector) add(true, L2("Energía PoE", "PoE power"), L2("Inyector PoE local: necesita toma de 110 V junto a la cámara.", "Local PoE injector: needs a 110 V outlet near the camera."));
+    else if (m.power === "poe") fedBy ? add(true, L2("Energía PoE", "PoE power"), L2(`Desde ${fedBy.name} por cable (${fmt(cableRun(fedBy, d))} m de 100 m)`, `From ${fedBy.name} over cable (${fmt(cableRun(fedBy, d))} m of 100 m)`))
+      : add(false, L2("Energía PoE", "PoE power"), L2("Necesita cable Cat6 a un switch o grabador con PoE, máximo 100 m.", "Needs Cat6 to a PoE switch or recorder, 100 m max."), fixLink());
+    if (m.power === "solar") add(null, L2("Panel solar", "Solar panel"), L2("Orientado al sur, inclinado 10–15°, sin sombra de 9:00 a 15:00. Con varios días nublados puede agotar la batería.", "Facing south, 10–15° tilt, no shade 9:00–15:00. Several cloudy days can drain it."));
+    if (m.power === "battery") add(null, L2("Batería", "Battery"), L2("Recarga cada 1 a 3 meses según la actividad (estimado).", "Recharge every 1–3 months depending on activity (estimate)."));
+    if (m.power === "ac" || m.power === "usb") add(null, L2("Toma de corriente", "Power outlet"), L2("Toma de 110 V a menos de 1,5 m o extensión exterior protegida; conviene respaldo UPS.", "110 V outlet within 1.5 m or protected outdoor extension; UPS backup advised."));
+    // red
+    const wl = lk.find(l => ["wifi_lan", "wifi_inet"].includes(l.kind));
+    if ((m.net || []).some(n => n.startsWith("wifi"))) {
+      const ap = wl ? other(wl, d) : null, apm = ap ? model(ap) : GENERIC_AP, rng = apRanges(apm)[0];
+      specs.push([L2("Alcance Wi-Fi práctico", "Practical Wi-Fi range"), `≈ ${fmt(rng.practical)} m`, `${L2("con vista al AP", "with view of the AP")}${ap ? " " + ap.name : ""} · ${L2("con 1 muro", "through 1 wall")} ≈ ${fmt(rng.wall)} m`]);
+      if (wl) { const e = wifiEstimate(wl); add(e.q === "good" || e.q === "ok", L2("Señal Wi-Fi", "Wi-Fi signal"), `${ap.name} · ${fmt(Geo.dist(ap.pos, d.pos))} m · ${e.rssi} dBm (${t("q_" + e.q)})`, e.q === "good" || e.q === "ok" ? null : { label: L2("Buscar mejor AP", "Find a better AP"), run: () => { S.variant.links = S.variant.links.filter(x => x !== wl); if (!autoLink(d)) S.variant.links.push(wl); commit("autolink"); } }); }
+      else if (!fedBy && !lk.some(l => l.kind === "cat6")) {
+        const b = bestUplink(d);
+        add(false, L2("Punto de acceso", "Access point"), b ? L2(`Sin conectar. El mejor disponible: ${b.target.name} (${b.note}).`, `Not connected. Best available: ${b.target.name} (${b.note}).`) : L2(`No hay punto de acceso al alcance: coloca uno a menos de ≈ ${fmt(rng.practical)} m con línea de vista.`, `No access point in range: place one within ≈ ${fmt(rng.practical)} m with line of sight.`), b ? fixLink() : null);
+      }
+    }
+    if ((m.net || []).includes("lte")) add(null, "4G", L2("Necesita cobertura 4G y plan de datos (la app no modela enlaces 4G).", "Needs 4G coverage and a data plan (4G links are not modeled)."));
+    if (wifiOnly(d) && !N.allowed.some(k => k.startsWith("wifi"))) add(false, L2("Tipo de red", "Network type"), L2(`Es una cámara Wi-Fi y la red del proyecto es «${N.label}». Elige un modelo PoE.`, `It is a Wi-Fi camera and the project network is “${N.label}”. Pick a PoE model.`), N.cam ? { label: L2("Usar modelo sugerido", "Use suggested model"), run: () => { d.model = N.cam; commit("model"); } } : null);
+    // grabación
+    const cr = cameraRecorder(d, g);
+    if (cr) add(cr.compat, L2("Grabación", "Recording"), cr.compat ? L2(`En ${cr.rec.name}`, `On ${cr.rec.name}`) : L2(`${cr.rec.name} es de otra marca y esta cámara no tiene ONVIF.`, `${cr.rec.name} is another brand and this camera has no ONVIF.`));
+    else if (hasSD(d)) add(null, L2("Grabación", "Recording"), L2("En su tarjeta microSD (no llega a ningún grabador).", "On its microSD card (no recorder reachable)."));
+    else add(false, L2("Grabación", "Recording"), L2("No llega a ningún grabador por la red dibujada.", "No recorder reachable through the drawn network."));
+    if (m.cloud) add(N.internet ? null : (m.onvif ? null : false), L2("Nube", "Cloud"), N.internet ? L2("Avisos y automatizaciones por la nube: dependen de internet.", "Alerts and automations go through the cloud: they depend on internet.") : (m.onvif ? L2("Sin internet: graba en el NVR por ONVIF, pero sin avisos de la app.", "No internet: records on the NVR via ONVIF, but no app alerts.") : L2("La red no tiene internet: esta cámara pierde avisos y app; solo graba en microSD.", "Network has no internet: this camera loses alerts and app; microSD only.")));
+  }
+  else if (d.type === "ap") {
+    apRanges(m).forEach(rg => specs.push([`${L2("Alcance", "Range")} ${rg.band.replace(".", ",")} GHz`, `≈ ${fmt(rg.practical)} m`, `${L2("vista libre", "clear LOS")} ≈ ${fmt(rg.los)} m · ${L2("con 1 muro", "through 1 wall")} ≈ ${fmt(rg.wall)} m`]));
+    specs.push(["EIRP", (m.eirp || "—") + " dBm" + (m.eirpEst ? " *" : "")], [t("power"), `PoE ${m.poeClass === "at" ? "802.3at" : "802.3af"} · ${m.w || "—"} W`], [L2("Montaje", "Mounting"), L2("4–6 m de alto, con vista libre hacia las cámaras", "4–6 m high, clear view to cameras")]);
+    const fed = lk.filter(l => l.kind === "cat6").map(l => other(l, d)).find(x => x && poeCapable(x));
+    fed ? add(true, L2("Energía PoE", "PoE power"), L2(`Desde ${fed.name}`, `From ${fed.name}`)) : d.injector ? add(true, L2("Energía PoE", "PoE power"), L2("Inyector PoE local con toma de 110 V.", "Local PoE injector on a 110 V outlet.")) : add(false, L2("Energía PoE", "PoE power"), L2("Cable Cat6 a un switch PoE o un inyector PoE junto a una toma.", "Cat6 to a PoE switch or a PoE injector next to an outlet."), fixLink());
+    const up = findPath(d.id, x => ["switch", "router", "recorder"].includes(x.type), g);
+    up ? add(true, L2("Enlace a la red", "Uplink"), L2(`Llega a ${up.dev.name}`, `Reaches ${up.dev.name}`)) : add(false, L2("Enlace a la red", "Uplink"), L2("No llega a ningún switch, router ni grabador.", "Does not reach any switch, router or recorder."), fixLink());
+    const st = apStats(d);
+    st.forEach(s => add(s.pct < 0.7, L2(`Carga ${s.band} GHz`, `Load ${s.band} GHz`), L2(`${s.n} cámaras · ≈ ${fmt(s.mbps)} de ${s.cap} Mbps útiles (${pct(s.pct)})`, `${s.n} cameras · ≈ ${fmt(s.mbps)} of ${s.cap} usable Mbps (${pct(s.pct)})`)));
+    if (!st.length) add(null, L2("Clientes", "Clients"), L2("Sin cámaras conectadas todavía.", "No cameras connected yet."));
+  }
+  else if (d.type === "switch" || d.type === "recorder") {
+    const fed = poeFed(d), poeUse = fed.reduce((s, x) => s + poeW(x), 0), far = Math.max(0, ...linksOf(d, ["cat6"]).map(l => cableRun(other(l, d) || d, d)));
+    specs.push([L2("Puertos", "Ports"), `${m.ports || m.poePorts || "—"} · PoE ${m.poePorts || 0}${m.sfp ? " · SFP" : ""}`], [L2("PoE en uso", "PoE in use"), `${fmt(poeUse)} / ${m.poeBudget || 0} W · ${fed.length}/${m.poePorts || 0} ${L2("puertos", "ports")}`],
+      [L2("Alcance del cable", "Cable reach"), L2(`≈ ${fmt(cableReach(d))} m en línea recta (100 m de cable)`, `≈ ${fmt(cableReach(d))} m straight line (100 m of cable)`)], [L2("Cable más largo", "Longest run"), far ? fmt(far) + " m" : "—"]);
+    if (poeCapable(d)) add(poeUse <= (m.poeBudget || 0) && fed.length <= (m.poePorts || 0), "PoE", L2(`${fed.length} equipos, ${fmt(poeUse)} W de ${m.poeBudget} W`, `${fed.length} devices, ${fmt(poeUse)} W of ${m.poeBudget} W`));
+    if (far) add(far <= 100, L2("Distancias de cable", "Cable distances"), L2(`El tramo más largo mide ≈ ${fmt(far)} m (máx. 100 m).`, `Longest run ≈ ${fmt(far)} m (100 m max).`));
+    if (d.type === "recorder") {
+      const rs = recorderStats(d, g);
+      specs.splice(0, 0, [t("channels"), `${rs.cams.length} / ${rs.channels}`], [L2("Disco", "Storage"), `${fmt(rs.tb, 1)} TB${d.hddTB == null ? L2(" (supuesto: 4 TB por bahía)", " (assumed 4 TB per bay)") : ""}`], [t("alarmOut"), String(m.alarmOut || 0)]);
+      add(rs.cams.length <= rs.channels, t("channels"), L2(`${rs.cams.length} cámaras graban aquí, admite ${rs.channels}.`, `${rs.cams.length} cameras record here, supports ${rs.channels}.`));
+      if (rs.cams.length) add(rs.days >= 7, L2("Días de grabación", "Retention"), L2(`≈ ${fmt(rs.days)} días con ${fmt(rs.perDay)} GB por día.`, `≈ ${fmt(rs.days)} days at ${fmt(rs.perDay)} GB per day.`));
+      add(null, L2("Monitor", "Monitor"), L2("Salida HDMI: el monitor a menos de 15 m (más lejos, extensor HDMI por Cat6).", "HDMI out: monitor within 15 m (farther, HDMI over Cat6 extender)."));
+      if (N.internet) add(S.variant.devices.some(x => x.type === "router"), "Internet", L2("Para vista remota necesita un router con salida a internet.", "Remote view needs a router with internet."));
+    } else {
+      const up = findPath(d.id, x => x.type === "recorder" || x.type === "router", g);
+      up ? add(true, L2("Enlace a la red", "Uplink"), L2(`Llega a ${up.dev.name}`, `Reaches ${up.dev.name}`)) : add(false, L2("Enlace a la red", "Uplink"), L2("No llega al grabador ni al router.", "Does not reach the recorder or router."), fixLink());
+    }
+    add(nearUPS(d), "UPS", nearUPS(d) ? L2("Con respaldo a menos de 5 m.", "Backed up within 5 m.") : L2("Sin UPS cerca: con cada corte de luz este nodo se apaga.", "No UPS nearby: each power cut takes this node down."), nearUPS(d) ? null : { label: L2("Agregar UPS aquí", "Add UPS here"), run: () => { S.variant.devices.push({ id: uid("d"), type: "power", model: d.type === "recorder" ? "ups-1500" : "ups-600-cabinet", name: "UPS-" + d.name, pos: Geo.dest(d.pos, 135, 1.5), mountH: 1 }); commit("ups"); } });
+  }
+  else if (d.type === "siren") {
+    const act = Catalog.get(d.actuator) || {}, db = m.db || 110;
+    specs.push([L2("Potencia", "Loudness"), db + " dB"], [L2("Se oye fuerte (85 dB)", "Loud (85 dB)"), L2(`hasta ≈ ${fmt(sirenDist(db, 85))} m`, `up to ≈ ${fmt(sirenDist(db, 85))} m`)], [L2("Audible (70 dB)", "Audible (70 dB)"), L2(`hasta ≈ ${fmt(sirenDist(db, 70))} m`, `up to ≈ ${fmt(sirenDist(db, 70))} m`)], [L2("Conexión", "Connection"), m.conn || "—"]);
+    if (m.conn === "relay" || act.id === "relay-12v") {
+      const src = lk.map(l => other(l, d)).find(x => x && (model(x).alarmOut || 0) > 0);
+      src ? add(true, L2("Disparo", "Trigger"), L2(`Salida de alarma de ${src.name} con relé (funciona sin internet)`, `Alarm output of ${src.name} via relay (works without internet)`)) : add(false, L2("Disparo", "Trigger"), L2("Cable de señal a la salida de alarma de un grabador (VIGI o Hikvision) con relé de 12 V.", "Signal wire to a recorder alarm output (VIGI or Hikvision) with a 12 V relay."), fixLink());
+      add(null, L2("Energía", "Power"), L2("Fuente de 12 V junto al relé.", "12 V supply next to the relay."));
+    } else if (m.conn === "superlink") add(S.variant.devices.some(x => x.model === "ui-superlink"), L2("Disparo", "Trigger"), L2("Necesita un UniFi SuperLink Gateway en el proyecto.", "Needs a UniFi SuperLink Gateway in the project."));
+    else if (m.conn === "zigbee") add(S.variant.devices.some(x => x.model === "ezviz-a3"), L2("Disparo", "Trigger"), L2("Necesita el gateway EZVIZ A3 en el proyecto.", "Needs the EZVIZ A3 gateway in the project."));
+    else if (m.conn === "poe") { const sw = lk.map(l => other(l, d)).find(x => x && poeCapable(x)); add(!!sw, L2("Energía y disparo", "Power and trigger"), sw ? L2(`PoE desde ${sw.name}`, `PoE from ${sw.name}`) : L2("Cable Cat6 a un switch PoE.", "Cat6 to a PoE switch."), sw ? null : fixLink()); }
+    if (act.cloud) add(N.internet ? null : false, L2("Nube", "Cloud"), L2("Se activa por la nube: sin internet no suena.", "Triggered through the cloud: silent without internet."));
+  }
+  else if (d.type === "pole") {
+    const ps = poleSpec(d);
+    specs.push([L2("Altura libre", "Height above ground"), ps.H + " m"], ...ps.rows);
+    Object.entries(ps.mats).forEach(([k, q]) => add(null, L2("Material", "Material"), `${q} × ${MATERIALS[k][Settings.v.lang === "en" ? "en" : "es"]}`));
+    if (ps.warn) add(false, L2("Instalación", "Installation"), ps.warn);
+  }
+  else if (d.type === "power") {
+    const u = upsStats(d);
+    specs.push([L2("Capacidad", "Capacity"), `${m.va || "—"} VA · ≈ ${u.wh} Wh`], [L2("Carga estimada", "Estimated load"), `${fmt(u.load)} W`], [L2("Autonomía", "Runtime"), u.load ? `≈ ${fmt(u.min)} min` : "—"], [L2("Respalda", "Backs up"), u.near.map(x => x.name).join(", ") || L2("nada a menos de 5 m", "nothing within 5 m")]);
+    add(u.near.length > 0, L2("Equipos respaldados", "Backed-up devices"), u.near.length ? L2("Equipos a menos de 5 m (mismo gabinete).", "Devices within 5 m (same cabinet).") : L2("Colócalo junto al switch, grabador o router.", "Place it next to the switch, recorder or router."));
+    if (u.load) add(u.min >= 15, L2("Autonomía", "Runtime"), L2(`≈ ${fmt(u.min)} min: debe cubrir el arranque del generador (≥ 15 min recomendado).`, `≈ ${fmt(u.min)} min: should cover generator start (≥ 15 min advised).`));
+  }
+  else if (d.type === "router") {
+    specs.push([L2("Función", "Role"), L2("Salida a internet, DHCP y firewall de la red", "Internet gateway, DHCP and network firewall")]);
+    add(N.internet ? true : null, "Internet", N.internet ? L2("Requiere un servicio de internet (fibra, cable o radio).", "Needs an internet service (fiber, cable or radio).") : L2("La red elegida es sin internet.", "The chosen network has no internet."));
+    const up = findPath(d.id, x => ["switch", "recorder"].includes(x.type), g);
+    up ? add(true, L2("Enlace a la red", "Uplink"), L2(`Conectado a ${up.dev.name}`, `Connected to ${up.dev.name}`)) : add(false, L2("Enlace a la red", "Uplink"), L2("Conéctalo al switch o al grabador.", "Connect it to the switch or recorder."), fixLink());
+    add(nearUPS(d), "UPS", nearUPS(d) ? L2("Con respaldo.", "Backed up.") : L2("Sin UPS cerca.", "No UPS nearby."));
+  }
+  else if (d.type === "display") {
+    const rec = S.variant.devices.filter(x => x.type === "recorder").sort((a, b) => Geo.dist(a.pos, d.pos) - Geo.dist(b.pos, d.pos))[0];
+    const dist = rec ? Geo.dist(rec.pos, d.pos) : null;
+    specs.push([L2("Pantalla", "Screen"), (m.inches || "—") + "\" HDMI"]);
+    add(rec ? dist <= 15 : false, "HDMI", rec ? L2(`${rec.name} a ${fmt(dist)} m (HDMI directo hasta 15 m).`, `${rec.name} at ${fmt(dist)} m (direct HDMI up to 15 m).`) : L2("No hay grabador en el proyecto.", "No recorder in the project."));
+  }
+  else if (d.type === "hub") {
+    const up = findPath(d.id, x => ["switch", "router", "recorder"].includes(x.type), g);
+    up ? add(true, L2("Enlace a la red", "Uplink"), up.dev.name) : add(false, L2("Enlace a la red", "Uplink"), L2("Conéctalo por cable al switch o router.", "Cable it to the switch or router."), fixLink());
+  }
+  return { rows, specs };
+}
+// datos del enlace inalámbrico
+function linkSheet(l) {
+  const rows = [], add = (ok, title, detail) => rows.push({ ok, title, detail });
+  if (l.kind === "bridge") {
+    const bm = Catalog.get(l.model) || Catalog.get("omada-eap211-bridge") || {}, L0 = linkLength(l), bs = bridgeStats(l), los = S.los?.[l.id];
+    add(L0 <= (bm.range || 0), L2("Distancia", "Distance"), L2(`${fmt(L0)} m de ${fmt(bm.range)} m de alcance`, `${fmt(L0)} m of ${fmt(bm.range)} m range`));
+    add(bs.pct < 0.7, L2("Capacidad", "Capacity"), L2(`≈ ${fmt(bs.mbps)} Mbps de video del otro lado, de ${bs.cap} Mbps útiles (${pct(bs.pct)})`, `≈ ${fmt(bs.mbps)} Mbps of video beyond it, of ${bs.cap} usable Mbps (${pct(bs.pct)})`));
+    if (los) add(los.clear, L2("Línea de vista", "Line of sight"), los.clear ? L2(`Despejada (margen ${fmt(los.minClear, 1)} m)`, `Clear (${fmt(los.minClear, 1)} m margin)`) : L2(`Sube las antenas al menos ${fmt(-los.minClear + 0.5, 1)} m más.`, `Raise the antennas at least ${fmt(-los.minClear + 0.5, 1)} m more.`));
+    else add(null, L2("Línea de vista", "Line of sight"), L2("Calcula el perfil para verificar la zona de Fresnel.", "Compute the profile to check the Fresnel zone."));
+  }
+  if (!netDef().allowed.includes(l.kind)) add(false, L2("Tipo de red", "Network type"), L2(`La red del proyecto (${netDef().label}) no prevé este tipo de enlace.`, `The project network (${netDef().label}) does not plan this link type.`));
+  return rows;
+}
+function sheetHTML(sh) {
+  Panel._fixes = [];
+  const rows = sh.rows.map(r => { let fx = ""; if (r.fix) { Panel._fixes.push(r.fix); fx = `<button class="btn sm" data-a="fix" data-i="${Panel._fixes.length - 1}">${esc(r.fix.label)}</button>`; } return `<div class="req ${r.ok === true ? "ok" : r.ok === false ? "bad" : "info"}"><i></i><div><b>${esc(r.title)}</b><span>${esc(r.detail)}</span>${fx}</div></div>`; }).join("");
+  const specs = (sh.specs || []).map(([k, v, sub]) => `<div><span>${esc(k)}</span><b>${esc(v)}${sub ? `<small>${esc(sub)}</small>` : ""}</b></div>`).join("");
+  return (specs ? `<h3>${L2("Datos técnicos y alcances", "Specs and ranges")}</h3><div class="specs wide">${specs}</div>` : "") + (rows ? `<h3>${L2("Para funcionar necesita", "To work it needs")}</h3><div class="reqs">${rows}</div>` : "");
+}
+
+/* ---------- Revisión global (se suma al análisis) ---------- */
+function checkPro(res) {
+  const N = netDef(), V = S.variant, W = res.warnings, g = graph();
+  V.links.forEach(l => { if (!N.allowed.includes(l.kind)) W.push({ lvl: "warn", id: l.id, msg: L2(`Enlace ${S.dev(l.a)?.name}–${S.dev(l.b)?.name} (${t("kind_" + l.kind)}) fuera del tipo de red «${N.label}».`, `Link ${S.dev(l.a)?.name}–${S.dev(l.b)?.name} (${t("kind_" + l.kind)}) outside network type “${N.label}”.`) }); });
+  const cams = V.devices.filter(d => d.type === "camera");
+  if (!N.internet) { const bad = cams.filter(c => model(c).cloud && !model(c).onvif); if (bad.length) W.push({ lvl: "bad", msg: L2(`${bad.length} cámaras dependen de la nube y la red no tiene internet (${bad.map(c => c.name).join(", ")}).`, `${bad.length} cameras depend on the cloud and the network has no internet (${bad.map(c => c.name).join(", ")}).`) }); }
+  if (!N.unset && N.internet && V.devices.length && !V.devices.some(d => d.type === "router")) W.push({ lvl: "warn", msg: L2("La red tiene internet pero no hay router en el diseño.", "The network has internet but no router is drawn.") });
+  const wifiCams = cams.filter(wifiOnly); if (wifiCams.length && !N.allowed.some(k => k.startsWith("wifi"))) W.push({ lvl: "bad", msg: L2(`${wifiCams.length} cámaras solo Wi-Fi en una red cableada.`, `${wifiCams.length} Wi-Fi-only cameras on a wired network.`) });
+  V.devices.filter(d => d.type === "ap").forEach(ap => apStats(ap).forEach(s => { if (s.pct >= 0.7) W.push({ lvl: s.pct >= 1 ? "bad" : "warn", id: ap.id, msg: L2(`${ap.name}: ${s.n} cámaras en ${s.band} GHz usan ${pct(s.pct)} de su capacidad útil.`, `${ap.name}: ${s.n} cameras on ${s.band} GHz use ${pct(s.pct)} of usable capacity.`) }); }));
+  V.links.filter(l => l.kind === "bridge").forEach(l => { const b = bridgeStats(l); if (b.pct >= 0.7) W.push({ lvl: b.pct >= 1 ? "bad" : "warn", id: l.id, msg: L2(`Puente ${S.dev(l.a)?.name}–${S.dev(l.b)?.name}: ${fmt(b.mbps)} Mbps de video para ${b.cap} Mbps útiles.`, `Bridge ${S.dev(l.a)?.name}–${S.dev(l.b)?.name}: ${fmt(b.mbps)} Mbps of video for ${b.cap} usable Mbps.`) }); });
+  V.devices.filter(d => d.type === "recorder").forEach(r => { const s = recorderStats(r, g); if (s.cams.length && s.days < 7) W.push({ lvl: "warn", id: r.id, msg: L2(`${r.name}: solo ≈ ${fmt(s.days)} días de grabación con ${fmt(s.tb, 1)} TB.`, `${r.name}: only ≈ ${fmt(s.days)} days of recording with ${fmt(s.tb, 1)} TB.`) }); });
+  const noUps = V.devices.filter(d => ["switch", "recorder", "router"].includes(d.type) && !nearUPS(d));
+  if (noUps.length) W.push({ lvl: "warn", msg: L2(`Sin UPS cerca: ${noUps.map(d => d.name).join(", ")}. Con cada corte de luz se apagan hasta que arranque el generador.`, `No UPS nearby: ${noUps.map(d => d.name).join(", ")}. They go down at every power cut until the generator starts.`) });
+  V.devices.filter(d => d.type === "power").forEach(u => { const s = upsStats(u); if (s.load && s.min < 15) W.push({ lvl: "warn", id: u.id, msg: L2(`${u.name}: autonomía ≈ ${fmt(s.min)} min, corta para esperar el generador.`, `${u.name}: ≈ ${fmt(s.min)} min runtime, short to wait for the generator.`) }); });
+  if (N.unset && V.devices.length) W.push({ lvl: "info", msg: L2("Define el tipo de red del proyecto (pestaña Proyecto) para afinar las conexiones y advertencias.", "Set the project network type (Project tab) to refine links and warnings.") });
+}
+function bomPro(add) {
+  const mats = {};
+  S.variant.devices.filter(d => d.type === "pole").forEach(d => Object.entries(poleSpec(d).mats).forEach(([k, q]) => mats[k] = (mats[k] || 0) + q));
+  Object.entries(mats).forEach(([k, q]) => add("mat-" + k, MATERIALS[k][Settings.v.lang === "en" ? "en" : "es"], q, MATERIALS[k].price, false));
+  const inj = S.variant.devices.filter(d => d.injector && !linksOf(d, ["cat6"]).some(l => poeCapable(other(l, d) || {}))).length;
+  if (inj) add("mat-injector", L2("Inyector PoE 802.3at", "802.3at PoE injector"), inj, 15, false);
+}
+
+/* ---------- Anillos de alcance en el mapa ---------- */
+function drawRings(d, layer) {
+  const m = model(d), ring = (r, color, dash, label) => {
+    L.circle(d.pos, { radius: r, color, weight: 1.5, dashArray: dash, fill: false, interactive: false }).addTo(layer);
+    L.marker(Geo.dest(d.pos, 0, r), { interactive: false, icon: L.divIcon({ className: "ringTip", html: label, iconSize: [120, 18], iconAnchor: [60, 9] }) }).addTo(layer);
+  };
+  if (d.type === "ap") apRanges(m).forEach((rg, i) => ring(rg.practical, i ? "#3cc7d6" : "#8fb8ff", i ? "2 6" : "8 6", `${rg.band.replace(".", ",")} GHz · ${fmt(rg.practical)} m`));
+  if (poeCapable(d)) ring(cableReach(d), "#ff9a3c", "6 6", `Cat6 · ${fmt(cableReach(d))} m`);
+  if (d.type === "siren") ring(sirenDist(m.db || 110, 85), "#ef5b5b", "5 5", `85 dB · ${fmt(sirenDist(m.db || 110, 85))} m`);
+}
+
 /* ---- map.js ---- */
 /* ===== Mapa: capas, dibujo y herramientas ===== */
 const ICON = {
@@ -2186,7 +2632,9 @@ const ICON = {
   chart: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
   file: '<path d="M6 2h8l5 5v15H6z"/><path d="M14 2v5h5"/>',
   globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
-  plus: '<path d="M12 5v14M5 12h14"/>'
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  list: '<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.3"/><circle cx="4.5" cy="12" r="1.3"/><circle cx="4.5" cy="18" r="1.3"/>',
+  wand: '<path d="M4 20L15 9"/><path d="M15 9l2-2 2 2-2 2z"/><path d="M18 3v2M21 6h-2M13 4l1 1M20 12l-1-1"/>'
 };
 const svg = (name, cls = "") => `<svg class="ic ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${ICON[name] || ""}</svg>`;
 const TYPE_COLOR = { camera: "#f2a541", ap: "#4b8df8", bridge: "#e05bd0", switch: "#9fd356", recorder: "#a77bf3", router: "#3cc7d6", siren: "#ef5b5b", hub: "#7bd389", pole: "#c9d3dd", power: "#f2c14e", display: "#c9d3dd" };
@@ -2198,7 +2646,7 @@ const MapV = {
     L.control.zoom({ position: "bottomright" }).addTo(m);
     L.control.scale({ position: "bottomleft", metric: true, imperial: false }).addTo(m);
     m.attributionControl.setPrefix(false);
-    ["overlay", "obstacles", "walls", "gaps", "cones", "links", "devices", "handles", "proposals", "draft"].forEach(k => this.L[k] = L.layerGroup().addTo(m));
+    ["overlay", "obstacles", "walls", "gaps", "cones", "rings", "links", "devices", "handles", "proposals", "draft"].forEach(k => this.L[k] = L.layerGroup().addTo(m));
     this.setBase(Settings.v.base);
     m.on("click", e => Tools.click(e));
     m.on("zoomend moveend", () => { if (S.project) { S.project.center = [m.getCenter().lat, m.getCenter().lng]; S.project.zoom = m.getZoom(); saveProjectSoon(); } });
@@ -2274,6 +2722,7 @@ const MapV = {
     mk.on("click", e => { L.DomEvent.stop(e); Tools.deviceTap(d); });
     mk.on("drag", e => { d.pos = [e.latlng.lat, e.latlng.lng]; this.refreshDevice(d); });
     mk.on("dragend", () => { if (S.snap) snapToWall(d); commit("move"); });
+    if (sel) drawRings(d, this.L.rings);
     if (sel && d.type === "camera") {
       const hpos = Geo.dest(d.pos, d.heading || 0, Math.max(6, Math.min(camRanges(d).det * 0.7, 25)));
       const hh = L.marker(hpos, { draggable: true, icon: L.divIcon({ className: "hd", iconSize: [26, 26], html: svg("target") }) }).addTo(this.L.handles);
@@ -2343,15 +2792,18 @@ const LAST_MODEL = { camera: "tapo-c460-kit", ap: "omada-eap610-outdoor", switch
 const Tools = {
   draft: null, linkFrom: null,
   set(mode) {
+    if ((mode.startsWith("place:") || mode === "link") && S.project && !S.project.network) { networkDialog(S.project, () => this.set(mode)); return; }
     if (this.draft && this.draft.pts.length > 1 && ["wall", "building"].includes(this.draft.kind)) this.finish();
     S.mode = mode; this.draft = ["wall", "building", "measure"].includes(mode) ? { kind: mode, pts: [] } : null; this.linkFrom = null;
     document.body.dataset.mode = mode;
     $$(".tool").forEach(b => b.classList.toggle("on", b.dataset.mode === mode));
     ModeBar.update(); MapV.render();
   },
+  pick(hint, cb) { this.set("select"); this.pickCb = cb; this.pickHint = hint; S.mode = "pick"; document.body.dataset.mode = "pick"; $$(".tool").forEach(b => b.classList.remove("on")); ModeBar.update(); },
   click(e) {
     if (Date.now() < (this.penUntil || 0)) return; // clic sintético al terminar un trazo con el lápiz
     const ll = [e.latlng.lat, e.latlng.lng], m = S.mode;
+    if (m === "pick") { const cb = this.pickCb; this.pickCb = null; this.set("select"); cb?.(ll); return; }
     if (m === "select") { if (S.sel) select(null); return; }
     if (["wall", "building", "measure"].includes(m)) {
       const dr = this.draft;
@@ -2366,7 +2818,10 @@ const Tools = {
       const d = { id: uid("d"), type, model: mdl, name: pre + String(n).padStart(2, "0"), pos: ll, mountH: type === "camera" ? 3 : type === "ap" ? 4 : 1.5 };
       if (type === "siren") d.actuator = md.conn === "relay" ? "relay-12v" : null;
       if (type === "camera") { if (S.snap) snapToWall(d); if (!orientCamera(d, "right")) d.heading = 0; }
-      S.variant.devices.push(d); S.sel = { kind: "device", id: d.id }; commit("add"); Panel.show(); return;
+      if (type === "pole") d.install = (md.height || 3) >= 5 ? "buried" : "plate";
+      S.variant.devices.push(d); S.sel = { kind: "device", id: d.id };
+      if (Settings.v.autoLink !== false && type !== "pole" && type !== "power") autoLink(d, true);
+      commit("add"); Panel.show(); return;
     }
     if (m === "link") { this.linkFrom = null; ModeBar.update(); }
   },
@@ -2413,11 +2868,21 @@ const Tools = {
   }
 };
 function defaultKind(a, b) {
+  let k = defaultKind0(a, b); const N = netDef();
+  if (k === "wifi_inet" && !N.internet) k = "wifi_lan";
+  if (!N.allowed.includes(k)) {
+    const infra = [a, b].every(x => ["switch", "recorder", "router", "ap"].includes(x.type));
+    k = infra && Geo.dist(a.pos, b.pos) > 90 && N.allowed.includes("fiber") ? "fiber" : infra && N.allowed.includes("bridge") && Geo.dist(a.pos, b.pos) > 90 ? "bridge" : N.allowed.includes("cat6") ? "cat6" : N.allowed[0];
+  }
+  return k;
+}
+function defaultKind0(a, b) {
   const ma = model(a), mb = model(b), types = [a.type, b.type];
   const isCam = d => d.type === "camera", wifiOnly = m => (m.net || []).some(n => n.startsWith("wifi")) && !(m.net || []).includes("poe");
   if (types.includes("camera")) { const c = isCam(a) ? a : b, cm = model(c); return wifiOnly(cm) ? (cm.cloud ? "wifi_inet" : "wifi_lan") : "cat6"; }
   if (a.type === "ap" && b.type === "ap") return Geo.dist(a.pos, b.pos) > 60 ? "bridge" : "wifi_lan";
   if (types.every(x => ["switch", "recorder", "router"].includes(x)) && Geo.dist(a.pos, b.pos) > 90) return "fiber";
+  if (types.includes("siren") && ((ma.alarmOut || 0) > 0 || (mb.alarmOut || 0) > 0)) return "alarm";
   if (types.includes("siren") && (ma.conn === "relay" || mb.conn === "relay" || ma.conn === "poe" || mb.conn === "poe")) return "cat6";
   if (types.includes("siren")) return "wifi_lan";
   return "cat6";
@@ -2436,7 +2901,7 @@ const ModeBar = {
     const el = $("#modebar"), m = S.mode;
     if (m === "select") { el.hidden = true; return; }
     el.hidden = false;
-    let hint = t("hint_" + (m.startsWith("place:") ? "place" : m), { type: t("type_" + m.slice(6)) });
+    let hint = m === "pick" ? Tools.pickHint : t("hint_" + (m.startsWith("place:") ? "place" : m), { type: t("type_" + m.slice(6)) });
     if (m === "link" && Tools.linkFrom) hint = t("hint_link2", { n: S.dev(Tools.linkFrom)?.name || "" });
     const dr = Tools.draft, multi = dr && dr.pts.length > 0;
     el.innerHTML = `<span>${esc(hint)}</span>` +
@@ -2477,15 +2942,7 @@ const Panel = {
     let spec = "";
     if (d.type === "camera") {
       const r = camRanges(d);
-      spec = `<div class="specs">
-        <div><span>${t("fov")}</span><b>${fmt(r.fov, 0)}°</b></div>
-        <div><span>${t("detection")}</span><b>${fmt(r.det, 0)} m${m.detEst ? " *" : ""}</b></div>
-        <div><span>${t("recognition")}</span><b>${fmt(r.rec, 1)} m</b></div>
-        <div><span>${t("identification")}</span><b>${fmt(r.id, 1)} m</b></div>
-        <div><span>${t("power")}</span><b>${t("pw_" + (m.power || "ac"))}${m.w ? " · " + m.w + " W" : ""}</b></div>
-        <div><span>${t("network")}</span><b>${(m.net || []).map(n => t("net_" + n)).join(", ") || "—"}</b></div>
-      </div>${m.detEst ? `<p class="muted small">* ${t("detEstNote")}</p>` : ""}
-      <label class="fld"><span>${t("heading")}</span><div class="row"><input type="range" id="f_heading" min="0" max="359" step="1" value="${Math.round(d.heading || 0)}"><input type="number" id="f_heading_n" class="num" min="0" max="359" value="${Math.round(d.heading || 0)}"></div></label>
+      spec = `<label class="fld"><span>${t("heading")}</span><div class="row"><input type="range" id="f_heading" min="0" max="359" step="1" value="${Math.round(d.heading || 0)}"><input type="number" id="f_heading_n" class="num" min="0" max="359" value="${Math.round(d.heading || 0)}"></div></label>
       <div class="row wrap"><button class="btn sm" data-a="orient" data-v="left">${t("orientLeft")}</button><button class="btn sm" data-a="orient" data-v="out">${t("orientOut")}</button><button class="btn sm" data-a="orient" data-v="right">${t("orientRight")}</button></div>
       <label class="fld"><span>${t("detOverride")}</span><input type="number" id="f_det" class="num" min="1" max="200" step="1" value="${d.det ?? ""}" placeholder="${fmt(m.det ?? r.det, 0)}"></label>`;
     }
@@ -2493,19 +2950,22 @@ const Panel = {
       const acts = Catalog.ofType("actuator");
       spec = `<label class="fld"><span>${t("actuator")}</span><select id="f_act"><option value="">${t("none")}</option>${acts.map(a => `<option value="${a.id}" ${a.id === d.actuator ? "selected" : ""}>${esc(a.name)}</option>`).join("")}</select></label>`;
     }
-    if (d.type === "ap") spec = `<div class="specs"><div><span>${t("bands")}</span><b>${(m.bands || []).join(" / ")} GHz</b></div><div><span>EIRP</span><b>${m.eirp || "—"} dBm${m.eirpEst ? " *" : ""}</b></div></div>`;
-    if (["switch", "recorder"].includes(d.type)) spec = `<div class="specs"><div><span>${t("channels")}</span><b>${m.channels ?? "—"}</b></div><div><span>PoE</span><b>${m.poePorts || 0} · ${m.poeBudget || 0} W</b></div><div><span>${t("alarmOut")}</span><b>${m.alarmOut ?? 0}</b></div></div>`;
+    if (d.type === "recorder") spec = `<label class="fld"><span>${L2("Disco total (TB)", "Total storage (TB)")}</span><input id="f_hdd" type="number" class="num" step="0.5" min="0" value="${d.hddTB ?? ""}" placeholder="${fmt((m.bays || 0) * 4)}"></label>`;
+    if (d.type === "pole") { const inst = d.install || ((m.height || 3) >= 5 ? "buried" : "plate"); spec = `<label class="fld"><span>${L2("Tipo de instalación", "Installation type")}</span><select id="f_install">${[["buried", L2("Empotrado en hoyo con concreto", "Buried in a concrete-filled hole")], ["plate", L2("Superficial: placa base con pernos", "Surface: base plate with anchors")], ["wall", L2("Adosado a pared con abrazaderas", "Wall-mounted with brackets")]].map(([k, l]) => `<option value="${k}" ${k === inst ? "selected" : ""}>${l}</option>`).join("")}</select></label>`; }
+    if (d.type === "ap" || (d.type === "camera" && m.power === "poe")) spec += `<label class="fld chk"><input type="checkbox" id="f_inj" ${d.injector ? "checked" : ""}> <span>${L2("Alimentación local con inyector PoE (sin switch)", "Local power with a PoE injector (no switch)")}</span></label>`;
+    const sheet = sheetHTML(deviceSheet(d)), canLink = !["pole", "power", "display"].includes(d.type);
     const photos = (d.photos || []).map(id => `<button class="ph" data-a="photo" data-id="${id}"><img data-photo="${id}" alt=""></button>`).join("");
     this.after = () => { loadThumbs(); bindDev(d); };
     return `<div class="phead" style="--c:${TYPE_COLOR[d.type]}">${svg(d.type)}<div><small>${t("type_" + d.type)}</small><input id="f_name" class="title-in" value="${esc(d.name)}"></div></div>
       <label class="fld"><span>${t("model")}</span><select id="f_model">${sel}</select></label>
       <p class="price">${m.price ? money(m.price) + (m.ver ? ` <i class="ok">${t("verified")}</i>` : ` <i class="est">${t("estimated")}</i>`) : `<i class="est">${t("noPrice")}</i>`}${m.notes ? `<br><span class="muted small">${esc(m.notes)}</span>` : ""}</p>
       ${spec}
+      ${sheet}
       <div class="row2"><label class="fld"><span>${t("mountH")}</span><input type="number" id="f_mh" class="num" step="0.5" min="0" value="${d.mountH ?? 3}"></label>
       <label class="fld"><span>${t("ground")}</span><div class="row"><b id="f_ground">${d.ground != null ? fmt(d.ground, 0) + " m" : "—"}</b><button class="btn sm" data-a="ground">${t("fetch")}</button></div></label></div>
       <label class="fld"><span>${t("notes")}</span><textarea id="f_notes" rows="3">${esc(d.notes || "")}</textarea></label>
       <div class="fld"><span>${t("photos")}</span><div class="photos">${photos}<label class="ph add">${svg("image")}<input type="file" accept="image/*" id="f_photo" hidden></label></div></div>
-      <div class="row wrap end"><button class="btn sm" data-a="dup">${t("duplicate")}</button><button class="btn sm danger" data-a="del">${t("delete")}</button></div>`;
+      <div class="row wrap end">${canLink ? `<button class="btn sm" data-a="autolink">${L2("Conectar automáticamente", "Connect automatically")}</button>` : ""}<button class="btn sm" data-a="dup">${t("duplicate")}</button><button class="btn sm danger" data-a="del">${t("delete")}</button></div>`;
   },
   linkForm(l) {
     if (!l) return "";
@@ -2521,6 +2981,7 @@ const Panel = {
       <label class="fld"><span>${t("linkKind")}</span><select id="f_kind">${kinds}</select></label>
       <div class="specs"><div><span>${t("distance")}</span><b>${fmt(L0, 1)} m</b></div></div>
       ${extra}
+      ${sheetHTML({ rows: linkSheet(l) })}
       <div class="fld"><span>${t("profile")}</span><button class="btn sm" data-a="profile">${t("calcProfile")}</button><div id="profile"></div>${los ? `<p class="small ${los.clear ? "ok" : "bad"}">${los.clear ? t("losClear", { c: fmt(los.minClear, 1) }) : t("losBlocked", { c: fmt(los.minClear, 1) })}</p>` : ""}</div>
       <div class="row wrap end"><button class="btn sm" data-a="swap">${t("swap")}</button><button class="btn sm danger" data-a="del">${t("delete")}</button></div>`;
   },
@@ -2550,7 +3011,10 @@ const Panel = {
     const vs = P.variants.map(v => `<button class="vrow ${v.id === V.id ? "on" : ""}" data-a="pickv" data-id="${v.id}"><b>${esc(v.name)}</b><span>${v.devices.filter(d => d.type === "camera").length} ${t("cams")}</span></button>`).join("");
     const ov = P.overlay;
     this.after = bindProject;
+    const NN = netDef(P);
     return `<h3>${t("project")}</h3><label class="fld"><input id="p_name" class="title-in" value="${esc(P.name)}"></label>
+      <h3>${L2("Tipo de red", "Network type")}</h3>
+      <div class="netcard"><b>${esc(NN.unset ? L2("Sin definir (mixta)", "Not set (mixed)") : NN.label)}</b><span>${esc(NN.desc)}</span><span>${L2("Internet", "Internet")}: <b>${NN.internet ? L2("sí", "yes") : "no"}</b> · ${L2("Enlaces", "Links")}: ${NN.allowed.map(k => t("kind_" + k)).join(", ")}</span><button class="btn sm" data-a="netedit">${L2("Cambiar tipo de red", "Change network type")}</button></div>
       <div class="row wrap"><button class="btn sm" data-a="projects">${svg("folder")} ${t("allProjects")}</button><label class="btn sm">${t("importKml")}<input type="file" id="p_kml" accept=".kml,.kmz,application/vnd.google-earth.kml+xml,application/vnd.google-earth.kmz" hidden></label><button class="btn sm" data-a="fit">${t("fitView")}</button></div>
       <h3>${t("variants")}</h3><div class="vlist">${vs}</div>
       <div class="row wrap"><input id="v_name" class="in" value="${esc(V.name)}"><button class="btn sm" data-a="vdup">${t("duplicate")}</button><button class="btn sm" data-a="vnew">${t("newVariant")}</button>${P.variants.length > 1 ? `<button class="btn sm danger" data-a="vdel">${t("delete")}</button>` : ""}</div>
@@ -2573,7 +3037,8 @@ const Panel = {
     const ws = a.warnings, order = { bad: 0, warn: 1, info: 2 };
     ws.sort((x, y) => order[x.lvl] - order[y.lvl]);
     this.after = bindAnalysis;
-    return `<h3>${t("coverage")} · ${t("bandOf", { n: a.band })}</h3>
+    return `<button class="btn sm wide pri" data-a="fixer">${svg("target")} ${L2("Revisor · Arreglar todo", "Reviewer · Fix all")}</button>
+      <h3>${t("coverage")} · ${t("bandOf", { n: a.band })}</h3>
       <div class="meter"><span>${t("detection")}</span><div class="bar"><i style="width:${a.det * 100}%"></i></div><b>${pct(a.det)}</b></div>
       <div class="meter id"><span>${t("identification")}</span><div class="bar"><i style="width:${a.id * 100}%"></i></div><b>${pct(a.id)}</b></div>
       <p class="muted small">${t("coverageNote", { p: fmt(a.perimeter) })}</p>
@@ -2601,6 +3066,7 @@ const Panel = {
       <button class="btn sm wide" data-a="csv">${t("exportCsv")}</button>`;
   },
   tab_ai() { return AI.panel(); },
+  tab_guide() { return Guide.panel(); },
   tab_catalog() { return CatUI.panel(); },
   tab_settings() {
     const v = Settings.v;
@@ -2609,7 +3075,9 @@ const Panel = {
       <label class="fld"><span>${t("language")}</span><select id="g_lang"><option value="es" ${v.lang === "es" ? "selected" : ""}>Español</option><option value="en" ${v.lang === "en" ? "selected" : ""}>English</option></select></label>
       <h3>Gemini</h3><p class="muted small">${t("geminiHelp")}</p>
       <label class="fld"><span>${t("apiKey")}</span><input id="g_key" class="in" type="password" autocomplete="off" value="${esc(v.geminiKey)}" placeholder="AIza…"></label>
-      <label class="fld"><span>${t("aiModel")}</span><div class="row"><input id="g_model" class="in" value="${esc(v.geminiModel)}" list="g_models"><datalist id="g_models"></datalist><button class="btn sm" data-a="models">${t("listModels")}</button></div></label>
+      <label class="fld"><span>${t("aiModel")}</span><div class="row"><input id="g_model" class="in" value="${esc(v.geminiModel)}" placeholder="${t("modelAuto")}" autocapitalize="off" autocorrect="off" spellcheck="false"><button class="btn sm" data-a="models">${t("listModels")}</button></div></label>
+      ${(AI.models || []).length ? `<div class="mlist">${AI.models.map(m => `<button class="chip2 ${m === v.geminiModel ? "on" : ""}" data-a="pickmodel" data-m="${esc(m)}">${esc(m)}</button>`).join("")}</div>` : ""}
+      <button class="btn sm wide" data-a="ping">${t("testAi")}</button>
       <p class="muted small">${t("geminiPrivacy")}</p>
       <h3>${t("signalModel")}</h3>
       <div class="row2"><label class="fld"><span>${t("wallLoss")}</span><input id="g_wl" type="number" class="num" value="${v.wallLoss}"></label><label class="fld"><span>${t("bldLoss")}</span><input id="g_bl" type="number" class="num" value="${v.buildingLoss}"></label></div>
@@ -2629,13 +3097,18 @@ function bindDev(d) {
   onIn("f_mh", e => { d.mountH = parseFloat(e.target.value) || 0; commit("mh"); });
   onIn("f_notes", e => { d.notes = e.target.value; commit("notes"); });
   onIn("f_det", e => { const v = parseFloat(e.target.value); if (isNaN(v)) delete d.det; else d.det = v; commit("det"); Panel.show(); });
-  onIn("f_act", e => { d.actuator = e.target.value || null; commit("act"); });
+  onIn("f_act", e => { d.actuator = e.target.value || null; commit("act"); Panel.show(); });
+  onIn("f_inj", e => { d.injector = e.target.checked; commit("inj"); Panel.show(); });
+  onIn("f_install", e => { d.install = e.target.value; commit("install"); Panel.show(); });
+  onIn("f_hdd", e => { const v = parseFloat(e.target.value); if (isNaN(v)) delete d.hddTB; else d.hddTB = v; commit("hdd"); Panel.show(); });
   const hs = $("#f_heading"), hn = $("#f_heading_n");
   if (hs) { hs.oninput = () => { d.heading = +hs.value; hn.value = hs.value; MapV.refreshDevice(d); }; hs.onchange = () => commit("heading"); hn.onchange = () => { d.heading = normDeg(+hn.value); hs.value = d.heading; commit("heading"); }; }
   Panel.syncHeading = dd => { if (dd.id === d.id && hs) { hs.value = Math.round(dd.heading); hn.value = Math.round(dd.heading); } };
   onIn("f_photo", async e => { const f = e.target.files[0]; if (!f) return; const id = await savePhoto(f, d); (d.photos ||= []).push(id); commit("photo"); Panel.show(); });
   $("#pbody").onclick = async e => {
     const b = e.target.closest("[data-a]"); if (!b) return; const a = b.dataset.a;
+    if (a === "fix") { Panel._fixes?.[+b.dataset.i]?.run(); Panel.show(); return; }
+    if (a === "autolink") { if (autoLink(d)) { commit("autolink"); Panel.show(); } return; }
     if (a === "orient") { if (orientCamera(d, b.dataset.v)) { commit("orient"); Panel.show(); } else toast(t("noWallNear"), "warn"); }
     if (a === "del") { S.variant.devices = S.variant.devices.filter(x => x.id !== d.id); S.variant.links = S.variant.links.filter(l => l.a !== d.id && l.b !== d.id); S.sel = null; commit("del"); Panel.show(); }
     if (a === "dup") { const c = deepCopy(d); c.id = uid("d"); c.name = d.name + "b"; c.pos = Geo.dest(d.pos, 90, 3); c.photos = []; S.variant.devices.push(c); S.sel = { kind: "device", id: c.id }; commit("dup"); Panel.show(); }
@@ -2689,6 +3162,7 @@ function bindProject() {
     if (a === "vdel") confirmDialog(t("confirmDelVariant", { n: S.variant.name }), () => { P.variants = P.variants.filter(v => v.id !== S.variantId); S.variantId = P.variants[0].id; commit("vdel"); Panel.show(); });
     if (a === "compare") compareDialog();
     if (a === "projects") ProjectsDialog.open();
+    if (a === "netedit") networkDialog(P, () => Panel.show());
     if (a === "fit") MapV.fit();
     if (a === "ovadj") Tools.set(S.mode === "overlay" ? "select" : "overlay");
     if (a === "ovdel") { delete P.overlay; commit("ovdel"); Panel.show(); }
@@ -2697,6 +3171,7 @@ function bindProject() {
 function bindAnalysis() {
   $("#pbody").onclick = async e => {
     const b = e.target.closest("[data-a]"); if (!b) return;
+    if (b.dataset.a === "fixer") { Fixer.open(); return; }
     if (b.dataset.a === "gap") { const g = S.analysis.gaps[+b.dataset.i]; MapV.map.fitBounds(L.latLngBounds(g.ll).pad(1.2)); }
     if (b.dataset.a === "goto") { const id = b.dataset.id; if (S.dev(id)) { select({ kind: "device", id }); MapV.map.setView(S.dev(id).pos, Math.max(MapV.map.getZoom(), 19)); } else if (S.link(id)) { select({ kind: "link", id }); MapV.map.fitBounds(L.latLngBounds(MapV.linkPts(S.link(id))).pad(.5)); } }
     if (b.dataset.a === "losall") {
@@ -2711,7 +3186,7 @@ function bindSettings() {
   const v = Settings.v;
   onIn("g_lang", async e => { v.lang = e.target.value; await Settings.save(); applyI18n(); Panel.show(); ModeBar.update(); });
   onIn("g_key", e => { v.geminiKey = e.target.value.trim(); Settings.save(); });
-  onIn("g_model", e => { v.geminiModel = e.target.value.trim() || "gemini-2.5-flash"; Settings.save(); });
+  onIn("g_model", e => { v.geminiModel = e.target.value.trim(); Settings.save(); });
   onIn("g_wl", e => { v.wallLoss = +e.target.value || 0; Settings.save(); commit("set"); });
   onIn("g_bl", e => { v.buildingLoss = +e.target.value || 0; Settings.save(); commit("set"); });
   onIn("g_rt", e => { v.routing = +e.target.value || 1; Settings.save(); commit("set"); });
@@ -2719,7 +3194,9 @@ function bindSettings() {
   navigator.storage?.estimate?.().then(s => { const el = $("#g_storage"); if (el) el.textContent = t("storageUsed", { u: fmt(s.usage / 1048576, 1), q: fmt(s.quota / 1048576, 0) }); }).catch(() => {});
   $("#pbody").onclick = async e => {
     const b = e.target.closest("[data-a]"); if (!b) return;
-    if (b.dataset.a === "models") { try { const ms = await AI.listModels(); $("#g_models").innerHTML = ms.map(m => `<option value="${m}">`).join(""); toast(t("modelsFound", { n: ms.length })); } catch (er) { toast(er.message, "bad"); } }
+    if (b.dataset.a === "models") { b.disabled = true; try { AI.models = await AI.listModels(); if (!AI.models.includes(v.geminiModel)) { const m = AI.pickModel(AI.models); if (m) v.geminiModel = m; await Settings.save(); } toast(t("modelsFound", { n: AI.models.length }), "ok"); } catch (er) { toast(er.message === "Load failed" || er.name === "TypeError" ? t("aiNetwork") : er.message, "bad"); } Panel.show(); }
+    if (b.dataset.a === "pickmodel") { v.geminiModel = b.dataset.m; await Settings.save(); Panel.show(); }
+    if (b.dataset.a === "ping") { b.disabled = true; b.textContent = t("loading"); try { const r = await AI.ping(); toast(t("aiPingOk", { m: r.m, s: r.s }), "ok"); } catch (er) { toast(er.message, "bad"); } Panel.show(); }
     if (b.dataset.a === "backup") Export.backup();
   };
 }
@@ -2771,7 +3248,7 @@ const ProjectsDialog = {
         const name = $("#np_name").value.trim() || t("newProject"), q = $("#np_place").value.trim();
         let center = [MapV.map.getCenter().lat, MapV.map.getCenter().lng];
         if (q) { const hit = await geocode(q); if (hit) center = hit; else { toast(t("placeNotFound"), "warn"); return; } }
-        const p = newProject(name, center); await dropPlaceholder(); await DB.set("projects", p.id, p); d.close(); await openProject(p); Tools.set("wall");
+        const p = newProject(name, center); await dropPlaceholder(); await DB.set("projects", p.id, p); d.close(); await openProject(p); networkDialog(p, () => Tools.set("wall"));
       }
     });
   }
@@ -2819,6 +3296,7 @@ const AI = {
     const P = S.project, V = S.variant, a = S.analysis || analyze(), xy = ll => Geo.toXY(ll).map(v => round(v, 1));
     return {
       project: P.name, variant: V.name, exteriorBand_m: P.settings.band,
+      network: (() => { const N = netDef(P); return { type: N.type, hybrid: N.hybrid, internet: N.internet, allowedLinks: N.allowed, description: N.label }; })(),
       walls: P.walls.map(w => ({ id: w.id, name: w.name, closed: !!w.closed, height: w.height, outsideSide: w.closed ? "fuera del polígono" : (w.outside || "right"), pts: w.pts.map(xy) })),
       obstacles: P.obstacles.map(o => o.kind === "tree" ? { id: o.id, kind: "tree", x: xy(o.center)[0], y: xy(o.center)[1], r: o.r, height: o.height } : { id: o.id, kind: "building", pts: o.pts.map(xy), height: o.height }),
       devices: V.devices.map(d => { const o = { id: d.id, type: d.type, model: d.model, name: d.name, x: xy(d.pos)[0], y: xy(d.pos)[1], mountH: d.mountH }; if (d.type === "camera") o.heading = round(d.heading || 0); if (d.actuator) o.actuator = d.actuator; return o; }),
@@ -2846,6 +3324,8 @@ Reglas de diseño:
 - Cat6 máximo 100 m por tramo contando subidas; si es más largo usa fibra o un switch intermedio. Respeta puertos y presupuesto PoE.
 - Las cámaras Tapo de batería o solares no tienen ONVIF ni RTSP; sus alertas y Smart Actions dependen de la nube de Tapo. Para sirenas que suenen sin internet usa salidas de alarma de grabadores Hikvision o VIGI con relé, o UniFi Protect con sirenas UniFi.
 - No mezcles marcas en un grabador salvo por ONVIF (se pierden funciones inteligentes).
+- Respeta el tipo de red del proyecto (network): usa solo los enlaces de network.allowedLinks; si network.internet es false, nada puede depender de la nube.
+- Cada switch, grabador y router necesita un UPS a menos de 5 m (hay cortes de luz). Revisa capacidad de los AP (≈40 Mbps útiles en 2,4 GHz, ≈150 en 5 GHz) y de los puentes.
 - Tipos de enlace: wifi_inet (Wi-Fi con internet), wifi_lan (Wi-Fi sin internet), cat6, fiber, bridge (puente inalámbrico entre dos AP o puentes; indica model con un id de tipo bridge).
 Responde SOLO con un objeto JSON: {"reply": "texto para el usuario", "actions": [ ... ]}
 Acciones válidas (todas aceptan "reason", una frase corta):
@@ -2871,22 +3351,80 @@ ${en ? "Write every text field (reply, reason, report) in ENGLISH." : "Escribe t
   history(n = 6) {
     return (S.project.chat || []).filter(m => !m.local).slice(-n).map(m => ({ role: m.role === "user" ? "user" : "model", parts: [{ text: m.role === "user" ? m.text : JSON.stringify({ reply: m.text, actions: [] }) }] }));
   },
+  // elige el mejor modelo "flash" disponible para la clave (el más nuevo; si no hay, flash-lite)
+  pickModel(list) {
+    const ver = n => { const m = n.match(/gemini-(\d+(?:\.\d+)?)/); return m ? +m[1] : 0; };
+    const by = arr => arr.sort((a, b) => ver(b) - ver(a))[0];
+    const plain = list.filter(n => /^gemini-\d+(\.\d+)?-flash$/.test(n));
+    const lite = list.filter(n => /^gemini-\d+(\.\d+)?-flash-lite$/.test(n));
+    const any = list.filter(n => /flash/.test(n) && !/(image|tts|live|audio|embed|vision|robot|computer)/.test(n));
+    return by(plain) || by(lite) || by(any) || null;
+  },
+  async autoModel() {
+    this.models = await this.listModels();
+    const m = this.pickModel(this.models);
+    if (m) { Settings.v.geminiModel = m; await Settings.save(); toast(t("aiModelAuto", { m }), "ok"); }
+    return m;
+  },
+  setStatus(s) {
+    if (s) this.status = s;
+    const el = document.getElementById("ai_status");
+    if (el) el.textContent = this.status + (this.t0 ? " · " + Math.round((Date.now() - this.t0) / 1000) + " s" : "");
+  },
   async call(userParts, { withHistory = true } = {}) {
     if (!Settings.v.geminiKey) throw new Error(t("aiNoKey"));
-    const body = {
-      systemInstruction: { parts: [{ text: this.system() }] },
-      contents: [...(withHistory ? this.history() : []), { role: "user", parts: userParts }],
-      generationConfig: { responseMimeType: "application/json", temperature: 0.4, maxOutputTokens: 16384 }
+    if (!Settings.v.geminiModel) await this.autoModel();
+    let thinking = true, retried404 = false;
+    for (;;) {
+      const body = {
+        systemInstruction: { parts: [{ text: this.system() }] },
+        contents: [...(withHistory ? this.history() : []), { role: "user", parts: userParts }],
+        generationConfig: { responseMimeType: "application/json", temperature: 0.4, maxOutputTokens: 16384, ...(thinking ? { thinkingConfig: { includeThoughts: true } } : {}) }
+      };
+      let r;
+      // streaming (SSE): los datos llegan poco a poco y Safari no corta la conexión mientras el modelo piensa
+      try { r = await fetch(`${this.base}models/${encodeURIComponent(Settings.v.geminiModel)}:streamGenerateContent?alt=sse&key=${encodeURIComponent(Settings.v.geminiKey)}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }); }
+      catch (e) { throw new Error(t("aiNetwork")); }
+      if (r.ok) return this.readStream(r);
+      const j = await r.json().catch(() => ({})), msg = j?.error?.message || "";
+      if (r.status === 400 && thinking && /think/i.test(msg)) { thinking = false; continue; }
+      if (r.status === 404 && !retried404) { retried404 = true; if (await this.autoModel().catch(() => null)) continue; }
+      throw new Error(this.errMsg(r.status, j));
+    }
+  },
+  async readStream(r) {
+    const reader = r.body.getReader(), dec = new TextDecoder();
+    let buf = "", text = "", finish = "", blocked = false;
+    const handle = line => {
+      line = line.trim(); if (!line.startsWith("data:")) return;
+      let j; try { j = JSON.parse(line.slice(5)); } catch (e) { return; }
+      if (j.error) throw new Error(this.errMsg(j.error.code || 500, j));
+      if (j.promptFeedback?.blockReason) blocked = true;
+      const c = j.candidates?.[0]; if (c?.finishReason) finish = c.finishReason;
+      (c?.content?.parts || []).forEach(p => {
+        if (!p.text) return;
+        if (p.thought) this.setStatus(t("aiThinking"));
+        else { text += p.text; this.setStatus(t("aiReceiving", { n: text.length })); }
+      });
     };
-    const r = await fetch(`${this.base}models/${encodeURIComponent(Settings.v.geminiModel || "gemini-2.5-flash")}:generateContent?key=${encodeURIComponent(Settings.v.geminiKey)}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-    const j = await r.json().catch(() => ({}));
-    if (!r.ok) throw new Error(this.errMsg(r.status, j));
-    const c = j.candidates?.[0];
-    if (!c) throw new Error(j.promptFeedback?.blockReason ? t("aiBlocked") : t("aiEmpty"));
-    const text = (c.content?.parts || []).filter(p => p.text && !p.thought).map(p => p.text).join("");
+    for (;;) {
+      let chunk;
+      try { chunk = await reader.read(); } catch (e) { throw new Error(t("aiNetwork")); }
+      if (chunk.done) break;
+      buf += dec.decode(chunk.value, { stream: true });
+      let i; while ((i = buf.indexOf("\n")) >= 0) { const line = buf.slice(0, i); buf = buf.slice(i + 1); handle(line); }
+    }
+    if (buf) handle(buf);
+    if (!text) throw new Error(blocked ? t("aiBlocked") : finish === "MAX_TOKENS" ? t("aiTooLong") : t("aiEmpty"));
     const out = this.parse(text);
-    if (c.finishReason === "MAX_TOKENS" && !out) throw new Error(t("aiTooLong"));
+    if (!out && finish === "MAX_TOKENS") throw new Error(t("aiTooLong"));
     return out || { reply: text, actions: [] };
+  },
+  // prueba rápida de conexión desde Ajustes
+  async ping() {
+    const t0 = Date.now();
+    const res = await this.call([{ text: 'Responde solo con este JSON: {"reply":"OK","actions":[]}' }], { withHistory: false });
+    return { ok: /ok/i.test(res.reply || ""), s: round((Date.now() - t0) / 1000, 1), m: Settings.v.geminiModel };
   },
   parse(text) {
     let s = (text || "").trim().replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/, "");
@@ -2901,7 +3439,8 @@ ${en ? "Write every text field (reply, reason, report) in ENGLISH." : "Escribe t
     const P = S.project; P.chat ||= [];
     const label = kind === "chat" ? extra : t("aiTask_" + kind) + (extra ? " · " + extra : "");
     P.chat.push({ role: "user", text: label, at: Date.now() });
-    this.busy = true; this.status = t("aiThinking"); Panel.show();
+    this.busy = true; this.status = t("aiThinking"); this.t0 = Date.now(); Panel.show();
+    const tick = setInterval(() => this.setStatus(), 1000);
     try {
       let res;
       if (kind === "satellite") res = await this.readSatellite(extra);
@@ -2917,20 +3456,21 @@ ${en ? "Write every text field (reply, reason, report) in ENGLISH." : "Escribe t
       if (P.chat.length > 80) P.chat.splice(0, P.chat.length - 80);
       saveProjectSoon();
     } catch (e) {
-      P.chat.push({ role: "model", local: true, err: true, text: e.message || String(e), at: Date.now() });
+      const msg = e && e.name === "TypeError" ? t("aiNetwork") : (e.message || String(e));
+      P.chat.push({ role: "model", local: true, err: true, text: msg, at: Date.now() });
     } finally {
-      this.busy = false; this.status = ""; MapV.render(); Panel.show();
+      clearInterval(tick); this.busy = false; this.status = ""; this.t0 = 0; MapV.render(); Panel.show();
     }
   },
   /* ---------- lectura de imagen satelital ---------- */
   async readSatellite(extra) {
     const m = MapV.map, b = m.getBounds(), bounds = [[b.getSouth(), b.getWest()], [b.getNorth(), b.getEast()]];
-    this.status = t("aiCapturing"); Panel.show();
+    this.setStatus(t("aiCapturing"));
     const M = await Tiles.mosaic(bounds, 1280, Settings.v.base === "none" ? "esri" : Settings.v.base, { withOverlay: true });
     if (!M.ok && !M.overlay) throw new Error(t("aiCaptureFail"));
     const data = M.cv.toDataURL("image/jpeg", 0.86).split(",")[1];
     const wm = round(Geo.dist(M.ll(0, M.H / 2), M.ll(M.W, M.H / 2))), hm = round(Geo.dist(M.ll(M.W / 2, 0), M.ll(M.W / 2, M.H)));
-    this.status = t("aiThinking"); Panel.show();
+    this.setStatus(t("aiThinking"));
     const prompt = `TAREA: en esta imagen aérea (cubre aproximadamente ${wm} m de ancho por ${hm} m de alto; el norte está arriba) identifica:
 1) los muros o cercas perimetrales del conjunto residencial (líneas continuas que lo encierran),
 2) las edificaciones (casas, garitas, galpones) como polígonos,
@@ -3049,7 +3589,7 @@ Máximo 60 elementos; simplifica los trazos a sus vértices principales.${extra 
       <p class="muted small">${t("aiTaskHint")}</p>
       ${props}
       <div class="chat" id="chat">${log.slice(-40).map(m => `<div class="msg ${m.role} ${m.err ? "err" : ""}">${fmtText(m.text)}</div>`).join("") || `<p class="muted small">${t("aiEmptyChat")}</p>`}
-      ${this.busy ? `<div class="msg model busy"><i class="spin"></i> ${esc(this.status)}</div>` : ""}</div>
+      ${this.busy ? `<div class="msg model busy"><i class="spin"></i> <span id="ai_status">${esc(this.status)}</span></div><p class="muted small">${t("aiStay")}</p>` : ""}</div>
       <div class="ask"><textarea id="ai_in" rows="2" placeholder="${t("aiAsk")}"></textarea><button class="btn pri" data-a="send" ${key && !this.busy ? "" : "disabled"}>${t("send")}</button></div>
       <h3>${t("report")} · ${esc(V.name)}</h3>
       <textarea id="ai_report" rows="8" placeholder="${t("reportPlaceholder")}">${esc(V.report || "")}</textarea>
@@ -3286,6 +3826,7 @@ const Export = {
       table([t("variant"), t("cams"), t("detection"), t("identification"), t("gapsM"), t("problems"), "USD", t("totalVEshort")],
         rows.map(({ v, a }) => [v.name, v.devices.filter(d => d.type === "camera").length, pct(a.det), pct(a.id), fmt(a.gaps.reduce((s, g) => s + g.len, 0)), a.warnings.filter(w => w.lvl === "bad").length, fmt(a.bom.total), fmt(a.bom.ve)]),
         { columnStyles: { 1: { halign: "right" }, 2: { halign: "right" }, 3: { halign: "right" }, 4: { halign: "right" }, 5: { halign: "right" }, 6: { halign: "right" }, 7: { halign: "right" } } });
+      para(L2("Tipo de red: ", "Network type: ") + netDef(P).label + " · " + L2("internet: ", "internet: ") + (netDef(P).internet ? L2("sí", "yes") : "no"), 9.5);
       para(t("pdfMethod", { b: P.settings.band }), 8.5, MUT);
       for (const { v } of rows) {
         doc.addPage(); y = M;
@@ -3447,6 +3988,380 @@ async function viewPhoto(id, d) {
   dialog({ title: d.name, wide: true, body: `<img class="big" src="${url}" alt="">`, actions: [{ label: t("delete"), kind: "danger", onClick: () => { d.photos = d.photos.filter(x => x !== id); DB.del("photos", id).catch(() => {}); commit("photo"); Panel.show(); } }, { label: t("close") }] });
 }
 
+/* ---- agents.js ---- */
+/* ===== Agentes: diseño automático, revisor, guía, órdenes de instalación y cotización ===== */
+const sleep0 = () => new Promise(r => setTimeout(r, 0));
+const CARD16 = { es: ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSO", "SO", "OSO", "O", "ONO", "NO", "NNO"], en: ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"] };
+const cardinal = h => CARD16[Settings.v.lang === "en" ? "en" : "es"][Math.round(normDeg(h) / 22.5) % 16];
+const toBearing = v => normDeg(deg(Math.atan2(v[0], v[1])));
+function rssiPair(apm, apPos, cm, camPos) {
+  const d = Geo.dist(apPos, camPos), cr = crossings(apPos, camPos), at = f => { const loss = fspl(d, f) + cr.walls * Settings.v.wallLoss + cr.bld * Settings.v.buildingLoss + (f === 5 ? 3 : 0); return Math.min((apm.eirp || 23) - loss, 17 + (apm.gain || 3) - loss); };
+  const r24 = at(2.4), r5 = (apm.bands || []).includes("5") && (cm.net || []).includes("wifi5") ? at(5) : -999;
+  return Math.max(r24, r5);
+}
+function nameSeq(prefix, used) { let i = 1; while (used.has(prefix + String(i).padStart(2, "0"))) i++; const n = prefix + String(i).padStart(2, "0"); used.add(n); return n; }
+
+/* ===================== 1. Diseño automático ===================== */
+const AutoDesign = {
+  open() {
+    const P = S.project;
+    if (!P.walls.length) { toast(L2("Dibuja o importa el muro perimetral primero.", "Draw or import the perimeter wall first."), "warn"); Tools.set("wall"); return; }
+    if (!P.network) { networkDialog(P, () => this.open()); return; }
+    const N = netDef(), cams = Catalog.ofType("camera"), def = N.cam || LAST_MODEL.camera, hasRec = S.variant.devices.some(d => d.type === "recorder");
+    const body = `<p class="muted small">${L2("Crea una variante nueva con cámaras orientadas hacia afuera, red, grabación, sirenas y respaldo eléctrico según el tipo de red", "Creates a new variant with outward cameras, network, recording, sirens and power backup for the network type")} <b>${esc(N.label)}</b>.</p>
+      <label class="fld"><span>${L2("Cámara", "Camera")}</span><select id="ad_cam">${[...new Set(cams.map(c => c.brand))].map(b => `<optgroup label="${esc(b)}">${cams.filter(c => c.brand === b).map(c => `<option value="${c.id}" ${c.id === def ? "selected" : ""}>${esc(c.name)} · ${fmt(camRanges({ model: c.id }).det)} m · ${c.hfov}°</option>`).join("")}</optgroup>`).join("")}</select></label>
+      <label class="fld"><span>${L2("Objetivo", "Goal")}</span><select id="ad_goal">
+        <option value="full">${L2("Cobertura completa de la franja (≈ 97 %)", "Full band coverage (≈ 97 %)")}</option>
+        <option value="eco">${L2("Económico (≈ 75 %)", "Budget (≈ 75 %)")}</option>
+        <option value="every">${L2("Una cámara cada N metros", "One camera every N metres")}</option></select></label>
+      <div class="row2"><label class="fld"><span>${L2("Cada N metros", "Every N metres")}</span><input id="ad_every" type="number" class="num" value="25" min="5" max="200"></label>
+      <label class="fld"><span>${L2("Sirenas", "Sirens")}</span><input id="ad_sir" type="number" class="num" value="${Math.max(2, Math.round(analyze().perimeter / 200))}" min="0" max="12"></label></div>
+      <div class="row2"><label class="fld"><span>${t("mountH")}</span><input id="ad_h" type="number" class="num" value="3.5" step="0.5" min="2" max="8"></label>
+      <label class="fld"><span>${L2("Máximo de cámaras", "Max cameras")}</span><input id="ad_max" type="number" class="num" value="80" min="2" max="300"></label></div>
+      <p class="muted small">${hasRec ? L2("La caseta será donde está el grabador de la variante actual.", "The guard house will be where the current variant's recorder is.") : L2("Después de pulsar Generar, toca en el mapa dónde está la caseta de vigilancia.", "After tapping Generate, tap the guard house on the map.")}</p>`;
+    dialog({ title: L2("Diseño automático", "Automatic design"), wide: true, body, actions: [{ label: t("cancel") }, { label: L2("Generar", "Generate"), kind: "pri", onClick: bg => {
+      const opt = { cam: $("#ad_cam", bg).value, goal: $("#ad_goal", bg).value, every: +$("#ad_every", bg).value || 25, sirens: +$("#ad_sir", bg).value || 0, mountH: +$("#ad_h", bg).value || 3.5, max: +$("#ad_max", bg).value || 80 };
+      const rec = S.variant.devices.find(d => d.type === "recorder");
+      if (rec) setTimeout(() => this.run(opt, rec.pos), 50);
+      else Tools.pick(L2("Toca dónde está la caseta de vigilancia (grabador y switch principal).", "Tap the guard house (recorder and main switch)."), ll => this.run(opt, ll));
+    } }] });
+  },
+  async run(opt, base) {
+    const prog = dialog({ title: L2("Diseño automático", "Automatic design"), body: `<p><i class="spin"></i> <span id="ad_prog">${L2("Preparando…", "Preparing…")}</span></p>` });
+    const say = s => { const el = $("#ad_prog"); if (el) el.textContent = s; };
+    try {
+      const P = S.project, N = netDef();
+      const V = { id: uid("v"), name: L2("Automático · ", "Auto · ") + N.label.split(" · ").pop(), devices: [], links: [] };
+      P.variants.push(V); S.variantId = V.id;
+      const used = new Set(), segs = wallSegments().concat(treeObstacles()), band = P.settings.band || 8;
+      const cm = Catalog.get(opt.cam) || {}, rng = camRanges({ model: opt.cam });
+      // --- 1. cámaras ---
+      say(L2("Calculando cobertura…", "Computing coverage…")); await sleep0();
+      const samples = perimeterSamples(2), pts = [];
+      samples.forEach(sm => [1, band / 2, band].forEach(o => pts.push(vec.add(sm.xy, vec.mul(sm.n, o)))));
+      const grid = {}, G = 10, key = (x, y) => Math.floor(x / G) + "," + Math.floor(y / G);
+      pts.forEach((p, i) => (grid[key(p[0], p[1])] ||= []).push(i));
+      const near = (xy, r) => { const out = [], n = Math.ceil(r / G); const cx = Math.floor(xy[0] / G), cy = Math.floor(xy[1] / G); for (let i = -n; i <= n; i++) for (let j = -n; j <= n; j++) (grid[(cx + i) + "," + (cy + j)] || []).forEach(k => out.push(k)); return out; };
+      const cands = [];
+      const headingsAt = sm => { const nb = toBearing(sm.n), out = [nb]; [sm.u, vec.mul(sm.u, -1)].forEach(u => { const along = toBearing(u), side = normDeg(nb - along) > 180 ? -1 : 1; out.push(normDeg(along + side * (4 + rng.fov / 2))); }); return out; };
+      let chosen = [];
+      if (opt.goal === "every") {
+        let next = 0, flip = false;
+        samples.forEach(sm => { if (sm.s + 1e-6 >= next) { const hs = headingsAt(sm); chosen.push({ xy: vec.sub(sm.xy, vec.mul(sm.n, 0.4)), h: hs[flip ? 2 : 1], n: sm.n, s: sm.s }); flip = !flip; next = sm.s + opt.every; } });
+        chosen = chosen.slice(0, opt.max);
+      } else {
+        for (let i = 0; i < samples.length; i++) {
+          const sm = samples[i], xy = vec.sub(sm.xy, vec.mul(sm.n, 0.4));
+          headingsAt(sm).forEach(h => { const c = { xy, h, r: rng, mh: opt.mountH }; const seen = near(xy, rng.det + 1).filter(k => camSees(c, pts[k], segs, "det")); if (seen.length) cands.push({ xy, h, n: sm.n, s: sm.s, seen }); });
+          if (i % 40 === 0) { say(L2(`Calculando cobertura… ${Math.round(i / samples.length * 100)} %`, `Computing coverage… ${Math.round(i / samples.length * 100)} %`)); await sleep0(); }
+        }
+        const covered = new Uint8Array(pts.length), target = opt.goal === "eco" ? 0.75 : 0.97; let cov = 0;
+        while (chosen.length < opt.max) {
+          let best = null, bg = 0;
+          for (const c of cands) { let g = 0; for (const k of c.seen) if (!covered[k]) g++; if (g > bg) { bg = g; best = c; } }
+          if (!best || bg < 2) break;
+          best.seen.forEach(k => { if (!covered[k]) { covered[k] = 1; cov++; } }); chosen.push(best);
+          if (cov / pts.length >= target) break;
+        }
+      }
+      chosen.sort((a, b) => a.s - b.s);
+      const cams = chosen.map(c => ({ id: uid("d"), type: "camera", model: opt.cam, name: nameSeq("C", used), pos: Geo.toLL(c.xy), heading: round(c.h, 1), mountH: opt.mountH, _n: c.n, _xy: c.xy }));
+      V.devices.push(...cams);
+      // --- 2. caseta ---
+      say(L2("Armando la red…", "Building the network…")); await sleep0();
+      const b0 = Geo.toXY(base), at = (dx, dy) => Geo.toLL([b0[0] + dx, b0[1] + dy]);
+      const recModel = { Tapo: "tapo-h500", EZVIZ: "ezviz-x5s", Ubiquiti: "ui-unvr-g2", Hikvision: "hik-7616nxi-k2-16p", "TP-Link": "vigi-nvr4032h" }[cm.brand] || "vigi-nvr4032h";
+      const add = (type, model, name, pos, extra = {}) => { const d = { id: uid("d"), type, model, name, pos, mountH: type === "camera" ? opt.mountH : type === "ap" ? 4.5 : 1.5, ...extra }; V.devices.push(d); return d; };
+      const link = (a, b, kind, model) => { const l = { id: uid("l"), a: a.id, b: b.id, kind }; if (kind === "bridge") l.model = model || "omada-eap211-bridge"; V.links.push(l); return l; };
+      const ok = k => N.allowed.includes(k);
+      const sw0 = add("switch", "switch-poe-8-sfp", nameSeq("SW", used), at(0, 0));
+      const recCap = Catalog.get(recModel)?.channels || 16, nRec = Math.max(1, Math.ceil(cams.length / recCap));
+      const recs = []; for (let i = 0; i < nRec; i++) { const r = add("recorder", recModel, nameSeq("NVR", used), at(1.5 + (i % 3) * 1.0, Math.floor(i / 3) * 1.0)); recs.push(r); link(sw0, r, "cat6"); }
+      add("power", "ups-1500", nameSeq("UPS", used), at(0.8, 1.2));
+      if (nRec > 6) add("power", "ups-1500", nameSeq("UPS", used), at(2.5, 2.5));
+      add("display", "monitor-24", nameSeq("MON", used), at(-1.5, 0));
+      if (N.internet) { const rt = add("router", "omada-er605", nameSeq("RT", used), at(0, -1.5)); link(sw0, rt, "cat6"); }
+      const swPorts = sw => (Catalog.get(sw.model)?.poePorts || 8) - 1;
+      const fedCount = new Map([[sw0.id, 0]]);
+      const backbone = (node, far) => { const run = cableRun(sw0, node); if (run <= 88 && ok("cat6") && !(N.hybrid === "fiber_poe" && run > 40)) return link(sw0, node, "cat6"); if (ok("fiber")) return link(sw0, node, "fiber"); if (ok("bridge")) return link(sw0, node, "bridge", Geo.dist(sw0.pos, node.pos) > 1000 ? "hik-3wf02-5ac-d" : "omada-eap211-bridge"); return link(sw0, node, "cat6"); };
+      const wifiNet = wifiOnly({ model: opt.cam }) || (!(cm.net || []).includes("poe") && N.allowed.some(k => k.startsWith("wifi")));
+      if (!wifiNet) {
+        // nodos PoE: agrupa cámaras consecutivas en switches de hasta 7 puertos con cable ≤ 95 m
+        const pending = cams.slice(); const groups = [];
+        pending.filter(c => cableRun(sw0, c) <= 88).slice(0, swPorts(sw0)).forEach(c => { link(sw0, c, "cat6"); fedCount.set(sw0.id, (fedCount.get(sw0.id) || 0) + 1); c._done = true; });
+        let g = [];
+        const nodePos = grp => { const cx = grp.reduce((s, c) => s + c._xy[0] - c._n[0] * 2, 0) / grp.length, cy = grp.reduce((s, c) => s + c._xy[1] - c._n[1] * 2, 0) / grp.length; return [cx, cy]; };
+        const fits = grp => { const np = Geo.toLL(nodePos(grp)); return grp.every(c => Geo.dist(np, c.pos) * Settings.v.routing + c.mountH + 1.5 <= 88); };
+        pending.filter(c => !c._done).forEach(c => { const tryG = g.concat(c); if (tryG.length <= 7 && fits(tryG)) g = tryG; else { if (g.length) groups.push(g); g = [c]; } });
+        if (g.length) groups.push(g);
+        groups.forEach(grp => {
+          const np = Geo.toLL(nodePos(grp)), sw = add("switch", "switch-poe-8-sfp", nameSeq("SW", used), np);
+          add("power", "ups-600-cabinet", nameSeq("UPS", used), Geo.dest(np, 135, 1.2));
+          backbone(sw); grp.forEach(c => link(sw, c, "cat6"));
+        });
+      } else {
+        // Wi-Fi: AP que cubran a todas las cámaras con señal buena (≥ −67 dBm) sin pasar del 70 % de su capacidad útil
+        const apm = Catalog.get("omada-eap610-outdoor") || GENERIC_AP, aps = [], assign = new Map();
+        const candAP = cams.map(c => Geo.toLL(vec.sub(c._xy, vec.mul(c._n, 5)))).concat([at(0, 3)]);
+        const sig = (p, c) => { const d = Geo.dist(p, c.pos), cr = crossings(p, c.pos), lo = f => fspl(d, f) + cr.walls * Settings.v.wallLoss + cr.bld * Settings.v.buildingLoss + (f === 5 ? 3 : 0), r = f => Math.min((apm.eirp || 23) - lo(f), 17 + (apm.gain || 3) - lo(f)); return { r24: r(2.4), r5: (cm.net || []).includes("wifi5") ? r(5) : -999 }; };
+        const fill = (p, pool) => { let c24 = 40 * 0.7, c5 = 150 * 0.7; const got = []; pool.map(c => ({ c, s: sig(p, c) })).filter(o => Math.max(o.s.r24, o.s.r5) >= -67).sort((a, b) => Math.max(b.s.r24, b.s.r5) - Math.max(a.s.r24, a.s.r5)).forEach(o => { const pk = camPeakMbps(o.c); if (o.s.r5 >= -65 && c5 >= pk) { c5 -= pk; got.push(o.c); } else if (o.s.r24 >= -67 && c24 >= pk) { c24 -= pk; got.push(o.c); } }); return got; };
+        let left = cams.slice();
+        while (left.length && aps.length < 40) {
+          let best = null, bc = [];
+          candAP.forEach(p => { const got = fill(p, left); if (got.length > bc.length) { bc = got; best = p; } });
+          if (!best || !bc.length) break;
+          const ap = add("ap", apm.id || "omada-eap610-outdoor", nameSeq("AP", used), best); aps.push(ap);
+          bc.forEach(c => assign.set(c.id, ap)); left = left.filter(c => !bc.includes(c));
+          if (aps.length % 4 === 0) { say(L2(`Colocando puntos de acceso… ${aps.length}`, `Placing access points… ${aps.length}`)); await sleep0(); }
+        }
+        // enlace de cada AP a la caseta
+        let apHub = null;
+        aps.forEach(ap => {
+          const run = cableRun(sw0, ap);
+          if (run <= 88 && ok("cat6")) { link(sw0, ap, "cat6"); return; }
+          if (ok("fiber") && ok("cat6")) { const sw = add("switch", "switch-poe-8-sfp", nameSeq("SW", used), Geo.dest(ap.pos, 180, 2)); add("power", "ups-600-cabinet", nameSeq("UPS", used), Geo.dest(ap.pos, 200, 3)); link(sw0, sw, "fiber"); link(sw, ap, "cat6"); return; }
+          if (ok("bridge")) { if (!apHub) { apHub = add("ap", apm.id || "omada-eap610-outdoor", nameSeq("AP", used), at(0, 3)); link(sw0, apHub, "cat6"); } link(apHub, ap, "bridge", Geo.dist(apHub.pos, ap.pos) > 1000 ? "hik-3wf02-5ac-d" : "omada-eap211-bridge"); ap.injector = true; return; }
+          link(sw0, ap, "cat6");
+        });
+        const kind = N.internet && ok("wifi_inet") && cm.cloud ? "wifi_inet" : ok("wifi_lan") ? "wifi_lan" : "wifi_inet";
+        cams.forEach(c => { const all = aps.concat(apHub ? [apHub] : []); const a0 = assign.get(c.id) || all.map(a => ({ a, r: rssiPair(model(a), a.pos, cm, c.pos) })).sort((x, y) => y.r - x.r)[0]?.a; if (a0) link(a0, c, kind); });
+      }
+      // --- 3. sirenas ---
+      if (opt.sirens > 0) {
+        const per = samples.length ? samples[samples.length - 1].s : 0;
+        const relayRec = recs.find(r => (Catalog.get(r.model)?.alarmOut || 0) > 0);
+        for (let k = 0; k < opt.sirens; k++) {
+          const target = per * (k + 0.5) / opt.sirens, sm = samples.reduce((b, x) => Math.abs(x.s - target) < Math.abs(b.s - target) ? x : b, samples[0]);
+          const pos = Geo.toLL(vec.sub(sm.xy, vec.mul(sm.n, 1.2)));
+          if (cm.brand === "Ubiquiti") { const s = add("siren", "ui-siren-poe", nameSeq("S", used), pos, { mountH: 3 }); const sw = V.devices.filter(d => d.type === "switch").sort((a, b) => Geo.dist(a.pos, pos) - Geo.dist(b.pos, pos))[0]; if (sw) link(sw, s, "cat6"); }
+          else if (relayRec && k < (Catalog.get(relayRec.model).alarmOut || 0)) { const s = add("siren", "siren-120-strobe", nameSeq("S", used), pos, { actuator: "relay-12v", mountH: 3 }); link(relayRec, s, "alarm"); }
+          else { const s = add("siren", "siren-120-strobe", nameSeq("S", used), pos, { actuator: N.internet ? "tapo-p400m" : "relay-12v", mountH: 3 }); const ap = V.devices.filter(d => d.type === "ap").sort((a, b) => Geo.dist(a.pos, pos) - Geo.dist(b.pos, pos))[0]; if (ap && N.internet) link(ap, s, "wifi_inet"); }
+        }
+      }
+      V.devices.forEach(d => { delete d._n; delete d._xy; delete d._done; });
+      S.sel = null; commit("autodesign");
+      const a = analyze(); prog.close(); MapV.fit();
+      dialog({ title: L2("Diseño listo", "Design ready"), body: `<p>${L2(`Variante «${esc(V.name)}»:`, `Variant “${esc(V.name)}”:`)} <b>${cams.length}</b> ${t("cams")}, ${V.devices.filter(d => d.type === "ap").length} AP, ${V.devices.filter(d => d.type === "switch").length} switches, ${V.devices.filter(d => d.type === "siren").length} ${L2("sirenas", "sirens")}.</p>
+        <div class="specs"><div><span>${t("detection")}</span><b>${pct(a.det)}</b></div><div><span>${t("identification")}</span><b>${pct(a.id)}</b></div><div><span>${t("totalUS")}</span><b>${money(a.bom.total)}</b></div><div><span>${t("alerts")}</span><b>${a.warnings.filter(w => w.lvl !== "info").length}</b></div></div>
+        <p class="muted small">${L2("Revísalo y ajústalo a mano. La variante anterior sigue intacta en el selector de variantes.", "Review and adjust by hand. The previous variant is untouched in the variant selector.")}</p>`,
+        actions: [{ label: L2("Revisar con el revisor", "Run the reviewer"), onClick: () => setTimeout(() => Fixer.open(), 50) }, { label: t("ok"), kind: "pri" }] });
+    } catch (e) { console.error(e); prog.close(); toast(L2("No se pudo generar el diseño: ", "Could not generate the design: ") + e.message, "bad"); }
+  }
+};
+
+/* ===================== 2. Revisor «Arreglar todo» ===================== */
+const Fixer = {
+  scan() {
+    const V = S.variant, N = netDef(), g = graph(), fixes = [], manual = [];
+    const F = (label, apply) => fixes.push({ label, apply, on: true });
+    const devs = V.devices;
+    // modelos que no encajan con la red
+    if (N.cam) devs.filter(d => d.type === "camera" && ((wifiOnly(d) && !N.allowed.some(k => k.startsWith("wifi"))) || (!N.internet && model(d).cloud && !model(d).onvif))).forEach(d => F(L2(`${d.name}: cambiar a ${Catalog.get(N.cam)?.name} (compatible con la red)`, `${d.name}: switch to ${Catalog.get(N.cam)?.name} (fits the network)`), () => { d.model = N.cam; }));
+    // grabador incompatible
+    devs.filter(d => d.type === "recorder").forEach(r => {
+      const cams = devs.filter(c => c.type === "camera" && cameraRecorder(c, g)?.rec === r && !cameraRecorder(c, g).compat);
+      if (cams.length) { const tapo = cams.every(c => model(c).brand === "Tapo"); const nm = tapo ? "tapo-h500" : "vigi-nvr4032h"; if (nm !== r.model) F(L2(`${r.name}: cambiar a ${Catalog.get(nm).name} para grabar ${cams.length} cámaras incompatibles`, `${r.name}: switch to ${Catalog.get(nm).name} to record ${cams.length} incompatible cameras`), () => { r.model = nm; }); }
+      const st = recorderStats(r, g);
+      if (st.cams.length > st.channels) F(L2(`${r.name}: agregar un segundo grabador (${st.cams.length} cámaras para ${st.channels} canales)`, `${r.name}: add a second recorder (${st.cams.length} cameras for ${st.channels} channels)`), () => { const r2 = { ...deepCopy(r), id: uid("d"), name: r.name + "b", pos: Geo.dest(r.pos, 90, 1.5), photos: [] }; V.devices.push(r2); const sw = linksOf(r).map(l => other(l, r)).find(x => x?.type === "switch"); if (sw) V.links.push({ id: uid("l"), a: sw.id, b: r2.id, kind: "cat6" }); });
+    });
+    // equipos sin conectar
+    devs.filter(d => !["pole", "power", "display"].includes(d.type) && !linksOf(d).length).forEach(d => { const b = bestUplink(d); if (b) F(L2(`Conectar ${d.name} a ${b.target.name} (${t("kind_" + b.kind)}, ${b.note})`, `Connect ${d.name} to ${b.target.name} (${t("kind_" + b.kind)}, ${b.note})`), () => autoLink(d, true)); else manual.push(L2(`${d.name}: no hay a qué conectarlo cerca.`, `${d.name}: nothing nearby to connect to.`)); });
+    // Wi-Fi débil
+    V.links.filter(l => ["wifi_lan", "wifi_inet"].includes(l.kind)).forEach(l => {
+      const e = wifiEstimate(l); if (!e || e.q === "good" || e.q === "ok") return;
+      const cam = [S.dev(l.a), S.dev(l.b)].find(x => x?.type === "camera"); if (!cam) return;
+      const cur = other(l, cam), alt = devs.filter(isRadio).filter(r => r !== cur).map(r => ({ r, e: wifiEstimate({ a: r.id, b: cam.id, kind: l.kind }) })).filter(o => o.e && o.e.rssi > e.rssi + 3).sort((a, b) => b.e.rssi - a.e.rssi)[0];
+      if (alt && alt.e.rssi >= -70) F(L2(`${cam.name}: cambiar de ${cur.name} (${e.rssi} dBm) a ${alt.r.name} (${alt.e.rssi} dBm)`, `${cam.name}: move from ${cur.name} (${e.rssi} dBm) to ${alt.r.name} (${alt.e.rssi} dBm)`), () => { l.a = alt.r.id; l.b = cam.id; });
+      else F(L2(`${cam.name}: agregar un punto de acceso cerca (señal actual ${e.rssi} dBm)`, `${cam.name}: add an access point nearby (current ${e.rssi} dBm)`), () => { const nw = nearestWall(cam.pos), p = nw ? Geo.toLL(vec.sub(Geo.toXY(cam.pos), vec.mul(nw.n, 5))) : Geo.dest(cam.pos, 0, 5); const ap = { id: uid("d"), type: "ap", model: "omada-eap610-outdoor", name: nameSeq("AP", new Set(devs.map(x => x.name))), pos: p, mountH: 4.5 }; V.devices.push(ap); if (!autoLink(ap, true)) ap.injector = true; l.a = ap.id; l.b = cam.id; });
+    });
+    // cámaras PoE sin energía
+    devs.filter(d => d.type === "camera" && model(d).power === "poe" && !d.injector && !linksOf(d, ["cat6"]).some(l => poeCapable(other(l, d) || {}))).forEach(d => {
+      if (!linksOf(d).length) return; // ya cubierto por «sin conectar»
+      F(L2(`${d.name}: darle PoE (cable a un switch PoE o un nodo nuevo)`, `${d.name}: give it PoE (cable to a PoE switch or a new node)`), () => { if (!autoLink(d, true)) { const nw = nearestWall(d.pos), p = nw ? Geo.toLL(vec.sub(Geo.toXY(d.pos), vec.mul(nw.n, 2))) : d.pos; const sw = { id: uid("d"), type: "switch", model: "switch-poe-8-sfp", name: nameSeq("SW", new Set(devs.map(x => x.name))), pos: p, mountH: 1.5 }; V.devices.push(sw, { id: uid("d"), type: "power", model: "ups-600-cabinet", name: "UPS-" + sw.name, pos: Geo.dest(p, 135, 1.2), mountH: 1 }); autoLink(sw, true); V.links.push({ id: uid("l"), a: sw.id, b: d.id, kind: "cat6" }); } });
+    });
+    // tramos de cable demasiado largos
+    V.links.filter(l => l.kind === "cat6").forEach(l => {
+      const a = S.dev(l.a), b = S.dev(l.b); if (!a || !b) return; const run = cableRun(a, b); if (run <= 100) return;
+      const infra = [a, b].every(x => ["switch", "recorder", "router", "ap"].includes(x.type) && x.type !== "ap");
+      if (infra && N.allowed.includes("fiber")) F(L2(`${a.name}–${b.name}: cambiar a fibra (${fmt(run)} m de Cat6)`, `${a.name}–${b.name}: switch to fiber (${fmt(run)} m of Cat6)`), () => { l.kind = "fiber"; });
+      else if (N.allowed.includes("bridge") && [a, b].every(x => ["switch", "ap", "router", "recorder"].includes(x.type))) F(L2(`${a.name}–${b.name}: cambiar a puente inalámbrico (${fmt(run)} m)`, `${a.name}–${b.name}: switch to a wireless bridge (${fmt(run)} m)`), () => { l.kind = "bridge"; l.model = "omada-eap211-bridge"; });
+      else manual.push(L2(`${a.name}–${b.name}: ${fmt(run)} m de Cat6; agrega un nodo intermedio.`, `${a.name}–${b.name}: ${fmt(run)} m of Cat6; add an intermediate node.`));
+    });
+    // enlaces fuera del tipo de red
+    V.links.filter(l => !N.allowed.includes(l.kind)).forEach(l => { const a = S.dev(l.a), b = S.dev(l.b); if (!a || !b) return; const k = defaultKind(a, b); if (N.allowed.includes(k) && k !== l.kind) F(L2(`${a.name}–${b.name}: cambiar ${t("kind_" + l.kind)} por ${t("kind_" + k)}`, `${a.name}–${b.name}: change ${t("kind_" + l.kind)} to ${t("kind_" + k)}`), () => { l.kind = k; if (k === "bridge") l.model = "omada-eap211-bridge"; }); });
+    // puentes fuera de alcance
+    V.links.filter(l => l.kind === "bridge").forEach(l => { const bm = Catalog.get(l.model) || {}; const L0 = linkLength(l); if (L0 > (bm.range || 0)) { const alt = Catalog.ofType("bridge").filter(x => x.range >= L0 * 1.2).sort((a, b) => a.range - b.range)[0]; if (alt) F(L2(`Puente ${S.dev(l.a)?.name}–${S.dev(l.b)?.name}: usar ${alt.name} (${fmt(L0)} m)`, `Bridge ${S.dev(l.a)?.name}–${S.dev(l.b)?.name}: use ${alt.name} (${fmt(L0)} m)`), () => { l.model = alt.id; }); } });
+    // sirenas por relé sin disparo
+    devs.filter(d => d.type === "siren" && (model(d).conn === "relay" || d.actuator === "relay-12v") && !linksOf(d).some(l => (model(other(l, d) || {}).alarmOut || 0) > 0)).forEach(s => {
+      const r = devs.filter(x => (model(x).alarmOut || 0) > 0).sort((a, b) => Geo.dist(a.pos, s.pos) - Geo.dist(b.pos, s.pos))[0];
+      if (r) F(L2(`${s.name}: cable de alarma desde ${r.name} (${fmt(Geo.dist(r.pos, s.pos) * Settings.v.routing)} m)`, `${s.name}: alarm cable from ${r.name} (${fmt(Geo.dist(r.pos, s.pos) * Settings.v.routing)} m)`), () => { V.links = V.links.filter(l => !(l.kind === "cat6" && (l.a === s.id || l.b === s.id))); V.links.push({ id: uid("l"), a: r.id, b: s.id, kind: "alarm" }); });
+      else manual.push(L2(`${s.name}: no hay grabador con salidas de alarma.`, `${s.name}: no recorder with alarm outputs.`));
+    });
+    // cámaras mirando hacia adentro
+    devs.filter(d => d.type === "camera").forEach(d => { const nw = nearestWall(d.pos); if (!nw || nw.d > 3) return; const h = rad(d.heading || 0), hv = [Math.sin(h), Math.cos(h)]; if (vec.dot(hv, nw.n) < -0.2) F(L2(`${d.name}: girarla hacia afuera del muro`, `${d.name}: turn it to face outward`), () => orientCamera(d, "right")); });
+    // UPS
+    devs.filter(d => ["switch", "recorder", "router"].includes(d.type) && !nearUPS(d)).forEach(d => { if (devs.some(u => u.type === "power" && Geo.dist(u.pos, d.pos) <= 5)) return; F(L2(`Agregar UPS junto a ${d.name}`, `Add a UPS next to ${d.name}`), () => { if (!nearUPS(d)) V.devices.push({ id: uid("d"), type: "power", model: d.type === "recorder" ? "ups-1500" : "ups-600-cabinet", name: "UPS-" + d.name, pos: Geo.dest(d.pos, 135, 1.2), mountH: 1 }); }); });
+    devs.filter(d => d.type === "power").forEach(u => { const s = upsStats(u); if (s.load && s.min < 15 && u.model !== "ups-1500") F(L2(`${u.name}: cambiar a UPS 1.500 VA (autonomía ≈ ${fmt(s.min)} min)`, `${u.name}: upgrade to a 1,500 VA UPS (≈ ${fmt(s.min)} min runtime)`), () => { u.model = "ups-1500"; }); });
+    // lo que requiere decisión
+    const a = S.analysis || analyze();
+    if (a.gaps.length) manual.push(L2(`${a.gaps.length} puntos ciegos (${fmt(a.gaps.reduce((s, g) => s + g.len, 0))} m): usa el diseño automático o agrega cámaras.`, `${a.gaps.length} blind spots (${fmt(a.gaps.reduce((s, g) => s + g.len, 0))} m): use automatic design or add cameras.`));
+    devs.filter(d => d.type === "recorder").forEach(r => { const st = recorderStats(r, g); if (st.cams.length && st.days < 7) manual.push(L2(`${r.name}: ≈ ${fmt(st.days)} días de grabación; aumenta el disco en su ficha.`, `${r.name}: ≈ ${fmt(st.days)} days of recording; raise storage in its sheet.`)); });
+    devs.filter(d => d.type === "ap").forEach(ap => apStats(ap).filter(s => s.pct >= 0.85).forEach(s => manual.push(L2(`${ap.name}: ${pct(s.pct)} de capacidad en ${s.band} GHz; reparte cámaras en otro AP.`, `${ap.name}: ${pct(s.pct)} of capacity on ${s.band} GHz; move cameras to another AP.`))));
+    return { fixes, manual };
+  },
+  open() {
+    const { fixes, manual } = this.scan();
+    if (!fixes.length && !manual.length) { toast(L2("El revisor no encontró nada que corregir.", "The reviewer found nothing to fix."), "ok"); return; }
+    const body = `${fixes.length ? `<p class="muted small">${L2("Correcciones que puedo aplicar. Desmarca las que no quieras; todo se puede deshacer.", "Fixes I can apply. Untick any you don't want; everything can be undone.")}</p><div class="plist2 tall">${fixes.map((f, i) => `<label class="prop"><input type="checkbox" data-i="${i}" checked><b>${i + 1}</b><span>${esc(f.label)}</span></label>`).join("")}</div>` : ""}
+      ${manual.length ? `<h3>${L2("Requiere tu decisión", "Needs your decision")}</h3><div class="wlist">${manual.map(m => `<div class="w warn"><i></i><span>${esc(m)}</span></div>`).join("")}</div>` : ""}`;
+    dialog({ title: L2("Revisor · Arreglar todo", "Reviewer · Fix all"), wide: true, body, actions: [{ label: t("close") }].concat(fixes.length ? [{ label: L2(`Aplicar ${fixes.length} correcciones`, `Apply ${fixes.length} fixes`), kind: "pri", onClick: bg => {
+      const sel = $$("input[data-i]", bg).filter(c => c.checked).map(c => fixes[+c.dataset.i]);
+      let n = 0; sel.forEach(f => { try { f.apply(); n++; } catch (e) { console.error(e); } });
+      commit("fixer"); const a = analyze();
+      toast(L2(`Se aplicaron ${n} correcciones. Quedan ${a.warnings.filter(w => w.lvl !== "info").length} advertencias.`, `${n} fixes applied. ${a.warnings.filter(w => w.lvl !== "info").length} warnings remain.`), "ok");
+    } }] : []) });
+  }
+};
+
+/* ===================== 3. Asistente guiado ===================== */
+const Guide = {
+  steps() {
+    const P = S.project, V = S.variant, a = S.analysis || analyze(), W = a.warnings, has = t2 => V.devices.some(d => d.type === t2);
+    const bad = W.filter(w => w.lvl === "bad").length, warn = W.filter(w => w.lvl === "warn").length;
+    const unlinked = V.devices.filter(d => !["pole", "power", "display"].includes(d.type) && !linksOf(d).length).length;
+    const noUps = V.devices.filter(d => ["switch", "recorder", "router"].includes(d.type) && !nearUPS(d)).length;
+    const sirens = V.devices.filter(d => d.type === "siren");
+    return [
+      { t: L2("Perímetro", "Perimeter"), ok: P.walls.length > 0, d: P.walls.length ? L2(`${P.walls.length} muro(s), ${fmt(a.perimeter)} m.`, `${P.walls.length} wall(s), ${fmt(a.perimeter)} m.`) : L2("Dibuja el muro tocando sus esquinas o importa un KML de Google Earth.", "Draw the wall by tapping its corners or import a Google Earth KML."), acts: [[L2("Dibujar muro", "Draw wall"), () => Tools.set("wall")], [t("importKml"), () => Panel.open("project")]] },
+      { t: L2("Tipo de red", "Network type"), ok: !!P.network, d: P.network ? netDef().label : L2("Elige si la red será intranet, con internet, cableada o híbrida.", "Choose intranet, internet, wired or hybrid."), acts: [[L2("Elegir tipo de red", "Choose network type"), () => networkDialog(P, () => Panel.show())]] },
+      { t: L2("Caseta y grabación", "Guard house and recording"), ok: has("recorder"), d: has("recorder") ? L2("Grabador colocado.", "Recorder placed.") : L2("Coloca el grabador en la caseta de vigilancia.", "Place the recorder in the guard house."), acts: [[L2("Colocar grabador", "Place recorder"), () => Tools.set("place:recorder")]] },
+      { t: L2("Cámaras y cobertura", "Cameras and coverage"), ok: has("camera") && a.det >= 0.9, d: has("camera") ? L2(`Detección ${pct(a.det)} · identificación ${pct(a.id)} · ${a.gaps.length} puntos ciegos.`, `Detection ${pct(a.det)} · identification ${pct(a.id)} · ${a.gaps.length} blind spots.`) : L2("Usa el diseño automático o coloca cámaras sobre el muro.", "Use automatic design or place cameras on the wall."), acts: [[L2("Diseño automático", "Automatic design"), () => AutoDesign.open()], [L2("Colocar cámara", "Place camera"), () => Tools.set("place:camera")]] },
+      { t: L2("Conexiones", "Connections"), ok: has("camera") && !unlinked && !W.some(w => w.lvl === "bad" && S.link(w.id)), d: unlinked ? L2(`${unlinked} equipos sin conectar.`, `${unlinked} devices not connected.`) : L2("Revisa señal Wi-Fi, cables y puentes.", "Check Wi-Fi signal, cables and bridges."), acts: [[L2("Revisor", "Reviewer"), () => Fixer.open()]] },
+      { t: L2("Energía y respaldo", "Power and backup"), ok: V.devices.length > 0 && !noUps, d: noUps ? L2(`${noUps} nodos sin UPS.`, `${noUps} nodes without UPS.`) : L2("Cada nodo tiene UPS cerca.", "Every node has a UPS nearby."), acts: [[L2("Revisor", "Reviewer"), () => Fixer.open()]] },
+      { t: L2("Sirenas", "Sirens"), ok: sirens.length > 0, d: sirens.length ? L2(`${sirens.length} sirenas.`, `${sirens.length} sirens.`) : L2("Agrega sirenas y su forma de disparo.", "Add sirens and how they trigger."), acts: [[L2("Colocar sirena", "Place siren"), () => Tools.set("place:siren")]] },
+      { t: L2("Revisión final", "Final review"), ok: V.devices.length > 0 && !bad, d: L2(`${bad} problemas y ${warn} avisos.`, `${bad} problems and ${warn} warnings.`), acts: [[L2("Revisor", "Reviewer"), () => Fixer.open()], [L2("Revisar con IA", "Review with AI"), () => { Panel.open("ai"); AI.run("review"); }]] },
+      { t: L2("Entregables", "Deliverables"), ok: null, d: L2("Informe para la junta, órdenes para el instalador y pedido de cotización.", "Board report, installer work orders and quote request."), acts: [[t("exportPdf"), () => pdfDialog()], [L2("Órdenes de instalación", "Work orders"), () => WorkOrders.pdf()], [L2("Pedir cotización", "Request quote"), () => Quote.open()]] }
+    ];
+  },
+  panel() {
+    const st = this.steps(), done = st.filter(s => s.ok === true).length, total = st.filter(s => s.ok !== null).length, cur = st.findIndex(s => s.ok === false);
+    Panel._gacts = [];
+    Panel.after = () => { $("#pbody").onclick = e => { const b = e.target.closest("[data-g]"); if (b) Panel._gacts[+b.dataset.g]?.(); }; };
+    return `<h3>${L2("Asistente guiado", "Guided assistant")}</h3>
+      <div class="meter"><span>${L2("Avance", "Progress")}</span><div class="bar"><i style="width:${done / total * 100}%"></i></div><b>${done}/${total}</b></div>
+      <div class="gsteps">${st.map((s, i) => `<div class="gstep ${s.ok === true ? "ok" : s.ok === false ? (i === cur ? "cur" : "todo") : "info"}"><i>${s.ok === true ? "✓" : i + 1}</i><div><b>${esc(s.t)}</b><span>${esc(s.d)}</span>${(i === cur || s.ok === null || s.ok === false) ? `<div class="row wrap">${s.acts.map(([l, f]) => { Panel._gacts.push(f); return `<button class="btn sm ${i === cur ? "pri" : ""}" data-g="${Panel._gacts.length - 1}">${esc(l)}</button>`; }).join("")}</div>` : ""}</div></div>`).join("")}</div>`;
+  }
+};
+
+/* ===================== 4a. Órdenes de instalación (PDF) ===================== */
+const WorkOrders = {
+  connText(d) {
+    if (d.type === "power") { const u = upsStats(d); return u.near.length ? L2("Respalda: ", "Backs up: ") + u.near.map(x => x.name).join(", ") + ` · ≈ ${fmt(u.min)} min` : L2("Junto a los equipos que respalda", "Next to the devices it backs up"); }
+    if (d.type === "display") { const r = S.variant.devices.filter(x => x.type === "recorder").sort((a, b) => Geo.dist(a.pos, d.pos) - Geo.dist(b.pos, d.pos))[0]; return r ? `HDMI ${r.name} (${fmt(Geo.dist(r.pos, d.pos) * Settings.v.routing + 1)} m)` : "HDMI"; }
+    const ls = linksOf(d);
+    if (!ls.length) return L2("Sin conexión", "Not connected");
+    return ls.map(l => { const o = other(l, d); if (!o) return ""; if (["wifi_lan", "wifi_inet"].includes(l.kind)) { const e = wifiEstimate(l); return `Wi-Fi ${o.name} (${e?.rssi} dBm)`; } const run = l.kind === "bridge" ? linkLength(l) : l.kind === "fiber" ? linkLength(l) * Settings.v.routing : cableRun(o, d); return `${t("kind_" + l.kind)} ${o.name} (${fmt(run)} m)`; }).join(" · ");
+  },
+  powerText(d) {
+    const m = model(d);
+    if (d.injector) return L2("Inyector PoE + toma 110 V", "PoE injector + 110 V outlet");
+    if (m.power === "poe" || d.type === "ap") { const f = linksOf(d, ["cat6"]).map(l => other(l, d)).find(x => x && poeCapable(x)); return f ? `PoE ${f.name}` : L2("PoE pendiente", "PoE pending"); }
+    if (m.power === "solar") return L2("Panel solar al sur, 10–15°", "Solar panel south, 10–15°");
+    if (m.power === "battery") return L2("Batería", "Battery");
+    if (["switch", "recorder", "router", "display", "hub", "power"].includes(d.type)) return L2("Toma 110 V", "110 V outlet") + (nearUPS(d) || d.type === "power" ? " + UPS" : "");
+    if (d.type === "siren") return d.actuator === "relay-12v" ? L2("Fuente 12 V + relé", "12 V supply + relay") : L2("Toma 110 V (enchufe inteligente)", "110 V (smart plug)");
+    return L2("Toma 110 V", "110 V outlet");
+  },
+  mountText(d) {
+    const pole = S.variant.devices.find(p => p.type === "pole" && Geo.dist(p.pos, d.pos) <= 1.5);
+    if (pole) { const ps = poleSpec(pole); return `${pole.name} · ${ps.inst === "buried" ? L2("empotrado", "buried") : ps.inst === "plate" ? L2("placa", "plate") : L2("pared", "wall")}`; }
+    const nw = nearestWall(d.pos); return nw && nw.d < 2 ? L2(`Muro, a ${fmt(nw.d, 1)} m del borde`, `Wall, ${fmt(nw.d, 1)} m from edge`) : L2("Soporte propio", "Own support");
+  },
+  pdf() {
+    return Export.busy(L2("Órdenes de instalación", "Work orders"), async () => {
+      const { jsPDF } = window.jspdf, P = S.project, V = S.variant, T = s => pdfSafe(s);
+      const doc = new jsPDF({ unit: "mm", format: "a4", orientation: "landscape" }), W = 297, M = 12, CW = W - 2 * M; let y = M;
+      const h1 = s => { doc.setFont("helvetica", "bold"); doc.setFontSize(15); doc.setTextColor(30, 36, 44); doc.text(T(s), M, y + 6); y += 11; };
+      const table = (head, body, opts = {}) => { doc.autoTable({ startY: y, head: [head.map(T)], body: body.map(r => r.map(c => T(c))), margin: { left: M, right: M }, styles: { font: "helvetica", fontSize: 7.6, cellPadding: 1.4, textColor: [30, 36, 44], valign: "middle" }, headStyles: { fillColor: [24, 32, 42], textColor: 255 }, alternateRowStyles: { fillColor: [245, 247, 249] }, ...opts }); y = doc.lastAutoTable.finalY + 6; };
+      h1(`${P.name} · ${V.name} · ${L2("Órdenes de instalación", "Work orders")}`);
+      doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(110, 120, 132);
+      doc.text(T(`${L2("Tipo de red", "Network type")}: ${netDef(P).label} · ${new Date().toLocaleDateString(Settings.v.lang === "en" ? "en-US" : "es-VE")}`), M, y); y += 5;
+      const r = await renderPlan(V, { max: 1800 });
+      const ih = 150, iw = Math.min(CW, ih * r.canvas.width / r.canvas.height);
+      doc.addImage(r.canvas.toDataURL("image/jpeg", .82), "JPEG", M + (CW - iw) / 2, y, iw, ih); doc.addPage(); y = M;
+      const order = ["recorder", "switch", "router", "power", "display", "ap", "hub", "camera", "siren", "pole"];
+      const devs = V.devices.slice().sort((a, b) => order.indexOf(a.type) - order.indexOf(b.type) || a.name.localeCompare(b.name));
+      h1(L2("Equipos", "Devices"));
+      table(["#", L2("Equipo", "Device"), L2("Modelo", "Model"), L2("Coordenadas", "Coordinates"), L2("Altura", "Height"), L2("Rumbo", "Heading"), L2("Conexión", "Connection"), L2("Energía", "Power"), L2("Montaje", "Mounting"), L2("Instalado / Probado", "Installed / Tested")],
+        devs.map((d, i) => [i + 1, d.name, model(d).name || d.model, `${d.pos[0].toFixed(6)}, ${d.pos[1].toFixed(6)}`, d.mountH != null ? fmt(d.mountH, 1) + " m" : "", d.type === "camera" ? `${Math.round(d.heading || 0)}° ${cardinal(d.heading || 0)}` : "", this.connText(d), this.powerText(d), d.type === "pole" ? "" : this.mountText(d), "[  ]  /  [  ]"]),
+        { columnStyles: { 0: { cellWidth: 7 }, 1: { cellWidth: 16 }, 2: { cellWidth: 26 }, 3: { cellWidth: 30 }, 4: { cellWidth: 12 }, 5: { cellWidth: 14 }, 7: { cellWidth: 28 }, 8: { cellWidth: 28 }, 9: { cellWidth: 20, halign: "center" } } });
+      h1(L2("Tendido de cables y enlaces", "Cable runs and links"));
+      table([L2("Desde", "From"), L2("Hasta", "To"), L2("Tipo", "Type"), L2("Metros a comprar", "Metres to buy"), L2("Notas", "Notes")],
+        V.links.map(l => { const a = S.dev(l.a), b = S.dev(l.b); if (!a || !b) return null; const m = l.kind === "cat6" || l.kind === "alarm" ? cableRun(a, b) : l.kind === "fiber" ? linkLength(l) * Settings.v.routing : null; const note = l.kind === "bridge" ? (Catalog.get(l.model)?.name || "") + L2(" · alinear antenas con vista libre", " · align antennas with clear view") : ["wifi_lan", "wifi_inet"].includes(l.kind) ? L2(`Probar señal en sitio (estimado ${wifiEstimate(l)?.rssi} dBm)`, `Test signal on site (estimated ${wifiEstimate(l)?.rssi} dBm)`) : l.kind === "cat6" ? L2("Cable exterior con protección UV, en tubería donde vaya enterrado", "Outdoor UV cable, in conduit where buried") : l.kind === "fiber" ? L2("Fibra exterior + módulos SFP en ambos extremos", "Outdoor fiber + SFP modules at both ends") : l.kind === "alarm" ? L2("Cable 2×18 AWG desde la salida de alarma al relé", "2×18 AWG from alarm output to relay") : ""; return [a.name, b.name, t("kind_" + l.kind), m != null ? fmt(Math.ceil(m)) + " m" : "—", note]; }).filter(Boolean));
+      const poles = devs.filter(d => d.type === "pole");
+      if (poles.length) { h1(L2("Postes", "Poles")); table([L2("Poste", "Pole"), L2("Instalación", "Installation"), L2("Detalle", "Detail"), L2("Materiales", "Materials")], poles.map(p => { const ps = poleSpec(p); return [p.name, ps.inst === "buried" ? L2("Empotrado", "Buried") : ps.inst === "plate" ? L2("Placa base", "Base plate") : L2("Pared", "Wall"), ps.rows.map(r => `${r[0]}: ${r[1]}`).join("\n"), Object.entries(ps.mats).map(([k, q]) => `${q} × ${MATERIALS[k][Settings.v.lang === "en" ? "en" : "es"]}`).join("\n")]; })); }
+      h1(L2("Pruebas al terminar", "Final tests"));
+      table([L2("Prueba", "Test"), L2("Cómo", "How"), L2("OK", "OK")], [
+        [L2("Señal Wi-Fi", "Wi-Fi signal"), L2("Medir con el teléfono en cada cámara Wi-Fi: mejor que −70 dBm", "Measure with a phone at each Wi-Fi camera: better than −70 dBm"), "[  ]"],
+        [L2("Imagen y ángulo", "Image and angle"), L2("Ver cada cámara en el monitor; ajustar rumbo según la tabla", "View each camera on the monitor; adjust heading per table"), "[  ]"],
+        [L2("Grabación", "Recording"), L2("Revisar que el grabador muestre todas las cámaras grabando", "Check the recorder shows every camera recording"), "[  ]"],
+        [L2("Sirenas", "Sirens"), L2("Disparar cada sirena desde el grabador o la app", "Trigger each siren from the recorder or app"), "[  ]"],
+        [L2("Corte de luz", "Power cut"), L2("Desconectar la corriente: los nodos deben seguir con UPS hasta que arranque el generador", "Cut power: nodes must stay up on UPS until the generator starts"), "[  ]"],
+        [L2("Puesta a tierra", "Grounding"), L2("Verificar barra y cable en postes metálicos", "Check rod and wire on metal poles"), "[  ]"]], { columnStyles: { 2: { cellWidth: 14, halign: "center" } } });
+      const n = doc.getNumberOfPages(); for (let i = 1; i <= n; i++) { doc.setPage(i); doc.setFontSize(8); doc.setTextColor(110, 120, 132); doc.text(T(`${P.name} · ${V.name} · ${i}/${n}`), W - M, 210 - 6, { align: "right" }); }
+      Files.deliver(doc.output("blob"), `${slug(P.name)}_${slug(V.name)}_${L2("ordenes", "work_orders")}_${stamp()}.pdf`);
+    });
+  }
+};
+
+/* ===================== 4b. Pedido de cotización ===================== */
+const Quote = {
+  text(withPrices, withMats) {
+    const b = (S.analysis || analyze()).bom, isMat = r => /^(cat6|fiber|fiber-end|alarm|mat-)/.test(r.id);
+    const eq = b.list.filter(r => !isMat(r)).sort((a, c) => c.qty - a.qty), mats = b.list.filter(isMat);
+    const line = r => { const perM = / \(m\)$/.test(r.name), nm = r.name.replace(/ \(m\)$/, ""); return `• ${perM ? fmt(r.qty) + " m · " + nm : fmt(r.qty) + " × " + nm}${withPrices && r.unit ? ` (${L2("ref.", "ref.")} USD ${fmt(r.unit, r.unit < 10 ? 2 : 0)}${perM ? "/m" : ""})` : ""}`; };
+    return L2(`Hola, buen día. Quisiera solicitar una cotización para un sistema de seguridad perimetral residencial:
+
+EQUIPOS
+${eq.map(line).join("\n")}${withMats && mats.length ? `\n\nMATERIALES\n${mats.map(line).join("\n")}` : ""}
+
+Por favor indicar disponibilidad, precio unitario, garantía y tiempo de entrega. Si algún modelo no está disponible, agradezco sugerir un equivalente.
+
+¡Muchas gracias!`, `Hello. I would like to request a quote for a residential perimeter security system:
+
+EQUIPMENT
+${eq.map(line).join("\n")}${withMats && mats.length ? `\n\nMATERIALS\n${mats.map(line).join("\n")}` : ""}
+
+Please include availability, unit price, warranty and delivery time. If a model is unavailable, please suggest an equivalent.
+
+Thank you!`);
+  },
+  open() {
+    if (!S.variant.devices.length) { toast(L2("La variante no tiene equipos todavía.", "The variant has no devices yet."), "warn"); return; }
+    const body = `<div class="row wrap"><label class="opt"><input type="checkbox" id="q_mat" checked> ${L2("Incluir materiales", "Include materials")}</label><label class="opt"><input type="checkbox" id="q_pr"> ${L2("Incluir precios de referencia", "Include reference prices")}</label></div>
+      <textarea id="q_txt" rows="16">${esc(this.text(false, true))}</textarea>
+      <p class="muted small">${L2("El mensaje no incluye la ubicación ni datos del conjunto.", "The message includes no location or site data.")}</p>`;
+    const d = dialog({ title: L2("Pedir cotización", "Request a quote"), wide: true, body, actions: [{ label: t("close") },
+      { label: L2("Copiar", "Copy"), onClick: bg => { navigator.clipboard?.writeText($("#q_txt", bg).value).then(() => toast(L2("Copiado.", "Copied."), "ok")).catch(() => toast(L2("No se pudo copiar.", "Could not copy."), "bad")); return false; } },
+      { label: L2("Correo", "Email"), onClick: bg => { location.href = `mailto:?subject=${encodeURIComponent(L2("Solicitud de cotización", "Quote request"))}&body=${encodeURIComponent($("#q_txt", bg).value)}`; return false; } },
+      { label: "WhatsApp", onClick: bg => { window.open("https://wa.me/?text=" + encodeURIComponent($("#q_txt", bg).value), "_blank"); return false; } },
+      { label: L2("Compartir", "Share"), kind: "pri", onClick: bg => { const txt = $("#q_txt", bg).value; if (navigator.share) navigator.share({ text: txt }).catch(() => {}); else navigator.clipboard?.writeText(txt); return false; } }] });
+    d.el.addEventListener("change", e => { if (e.target.id === "q_mat" || e.target.id === "q_pr") $("#q_txt", d.el).value = this.text($("#q_pr", d.el).checked, $("#q_mat", d.el).checked); });
+  }
+};
+
+/* ===================== Menú de agentes ===================== */
+function agentsMenu(btn) {
+  popover(btn, `<h4>${L2("Agentes", "Agents")}</h4>
+    <button class="mi" data-v="auto">${svg("camera")} ${L2("Diseño automático", "Automatic design")}</button>
+    <button class="mi" data-v="fix">${svg("target")} ${L2("Revisor · Arreglar todo", "Reviewer · Fix all")}</button>
+    <button class="mi" data-v="guide">${svg("list")} ${L2("Asistente guiado", "Guided assistant")}</button>
+    <button class="mi" data-v="orders">${svg("file")} ${L2("Órdenes de instalación (PDF)", "Work orders (PDF)")}</button>
+    <button class="mi" data-v="quote">${svg("budget")} ${L2("Pedir cotización", "Request a quote")}</button>`, v => {
+    if (v === "auto") AutoDesign.open(); if (v === "fix") Fixer.open(); if (v === "guide") Panel.open("guide"); if (v === "orders") WorkOrders.pdf(); if (v === "quote") Quote.open();
+  });
+}
+
 /* ---- catui.js ---- */
 /* ===== Catálogo editable ===== */
 const CAT_TYPES = ["camera", "recorder", "ap", "bridge", "switch", "router", "siren", "actuator", "hub", "power", "pole", "display"];
@@ -3534,7 +4449,7 @@ const RAIL = [
   ["place:camera", "camera", "r_camera"], ["place:ap", "ap", "r_ap"], ["place:switch", "switch", "r_switch"], ["place:recorder", "recorder", "r_recorder"], ["place:siren", "siren", "r_siren"], ["place:router", "router", "r_router"], ["more", "more", "r_more"], "|",
   ["link", "link", "r_link"], ["measure", "ruler", "r_measure"]
 ];
-const TABS = [["item", "select", "tb_item"], ["project", "folder", "tb_project"], ["analysis", "chart", "tb_analysis"], ["budget", "budget", "tb_budget"], ["ai", "ai", "tb_ai"], ["catalog", "book", "tb_catalog"], ["settings", "gear", "tb_settings"]];
+const TABS = [["guide", "list", "tb_guide"], ["item", "select", "tb_item"], ["project", "folder", "tb_project"], ["analysis", "chart", "tb_analysis"], ["budget", "budget", "tb_budget"], ["ai", "ai", "tb_ai"], ["catalog", "book", "tb_catalog"], ["settings", "gear", "tb_settings"]];
 
 function buildChrome() {
   $("#app").innerHTML = `
@@ -3547,6 +4462,7 @@ function buildChrome() {
     <button class="icon" id="bRedo" data-i18n-title="redo">${svg("redo")}</button>
     <button class="icon" id="bLayers" data-i18n-title="layers">${svg("layers")}</button>
     <button class="icon" id="bExport" data-i18n-title="export">${svg("share")}</button>
+    <button class="icon" id="bAgents" data-i18n-title="agents">${svg("wand")}</button>
     <button class="icon" id="bAI" data-i18n-title="assistant">${svg("ai")}</button>
     <button class="icon" id="bPanel" data-i18n-title="panel">${svg("panel")}</button>
   </header>
@@ -3594,12 +4510,14 @@ function layersMenu(btn) {
   popover(btn, `<h4>${t("basemap")}</h4>${["esri", "osm", "topo", "none"].map(k => `<label class="opt"><input type="radio" name="base" value="${k}" ${k === base ? "checked" : ""}> ${t("base_" + k)}</label>`).join("")}
     <h4>${t("show")}</h4>${HIDEABLE.map(k => `<label class="opt"><input type="checkbox" data-h="${k}" ${h[k] ? "" : "checked"}> ${t("show_" + k)}</label>`).join("")}
     <h4>${t("editing")}</h4><label class="opt"><input type="checkbox" id="o_snap" ${S.snap ? "checked" : ""}> ${t("snapWall")}</label>
+    <label class="opt"><input type="checkbox" id="o_auto" ${Settings.v.autoLink !== false ? "checked" : ""}> ${L2("Conectar automáticamente al colocar", "Auto-connect when placing")}</label>
     <button class="btn sm wide" data-v="fit">${t("fitView")}</button>`, (v, el) => {
     if (v === "fit") { MapV.fit(); return; }
     if (!el) return false;
     if (el.name === "base") { MapV.setBase(el.value); return false; }
     if (el.dataset.h) { (Settings.v.hide ||= {})[el.dataset.h] = !el.checked; Settings.save(); applyHidden(); return false; }
     if (el.id === "o_snap") { S.snap = el.checked; return false; }
+    if (el.id === "o_auto") { Settings.v.autoLink = el.checked; Settings.save(); return false; }
     return false;
   });
 }
@@ -3610,6 +4528,8 @@ function exportMenu(btn) {
     <button class="mi" data-v="kml">${svg("globe")} ${t("exportKml")}</button>
     <button class="mi" data-v="csv">${svg("budget")} ${t("exportCsv")}</button>
     <button class="mi" data-v="json">${svg("folder")} ${t("exportJson")}</button>
+    <button class="mi" data-v="orders">${svg("list")} ${L2("Órdenes de instalación (PDF)", "Work orders (PDF)")}</button>
+    <button class="mi" data-v="quote">${svg("budget")} ${L2("Pedir cotización", "Request a quote")}</button>
     <h4>${t("import")}</h4>
     <label class="mi">${svg("plus")} ${t("importAny")}<input type="file" id="imp_any" accept=".kml,.kmz,.json,application/json,application/vnd.google-earth.kml+xml,application/vnd.google-earth.kmz" hidden></label>`, (v, el, pop) => {
     if (el && el.id === "imp_any") { const f = el.files[0]; if (f) importAny(f); pop.remove(); return; }
@@ -3618,6 +4538,8 @@ function exportMenu(btn) {
     if (v === "kml") Export.kml();
     if (v === "csv") Export.csv();
     if (v === "json") Export.json();
+    if (v === "orders") WorkOrders.pdf();
+    if (v === "quote") Quote.open();
   });
 }
 function pdfDialog() {
@@ -3654,6 +4576,7 @@ function bindChrome() {
   $("#bUndo").onclick = undo; $("#bRedo").onclick = redo;
   $("#bLayers").onclick = e => layersMenu(e.currentTarget);
   $("#bExport").onclick = e => exportMenu(e.currentTarget);
+  $("#bAgents").onclick = e => agentsMenu(e.currentTarget);
   $("#bAI").onclick = () => { if (S.sel) { S.sel = null; MapV.render(); } Panel.open("ai"); };
   $("#bPanel").onclick = () => Panel.toggle();
   document.addEventListener("keydown", e => {
@@ -3669,7 +4592,7 @@ function bindChrome() {
 
 /* ---------- Bus de cambios ---------- */
 Bus.on("project", () => {
-  const P = S.project;
+  const P = S.project; applyNetworkDefaults();
   Tools.set("select");
   analyze();
   if (P.center) MapV.map.setView(P.center, P.zoom || 18, { animate: false }); else MapV.fit();
@@ -3703,7 +4626,7 @@ async function boot() {
   let p = ps.find(x => x.id === last) || ps[0];
   if (!p) { p = newProject(t("firstProject"), [8.2, -66.2], 6); p.placeholder = true; try { await DB.set("projects", p.id, p); } catch (e) {} }
   await openProject(p);
-  if (innerWidth > 1000) Panel.open("analysis");
+  if (innerWidth > 1000) Panel.open("guide");
   if (seeded) setTimeout(() => MapV.fit(), 300);
   welcome();
   document.body.classList.add("ready");
