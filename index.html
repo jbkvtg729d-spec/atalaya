@@ -3419,6 +3419,7 @@ const Panel = {
       <div class="row wrap"><input id="v_name" class="in" value="${esc(V.name)}"><button class="btn sm" data-a="vdup">${t("duplicate")}</button><button class="btn sm" data-a="vnew">${t("newVariant")}</button>${P.variants.length > 1 ? `<button class="btn sm danger" data-a="vdel">${t("delete")}</button>` : ""}</div>
       <label class="fld"><span>${t("variantNotes")}</span><textarea id="v_notes" rows="3" placeholder="${t("variantNotesPh")}">${esc(V.notes || "")}</textarea></label>
       <button class="btn sm wide" data-a="compare">${t("compareVariants")}</button>
+      <button class="btn sm wide pri" data-a="manual">${svg("book")} ${L2("Generar manual técnico de instalación y configuración", "Generate technical installation and configuration manual")}</button>
       <h3>${L2("Escenario de grabación", "Recording scenario")}</h3>
       <div class="netcard"><b>${esc(recLabel())}</b><span>${L2(`${recProfile().days} días de grabación · actividad ${{ low: "baja", med: "media", high: "alta" }[recProfile().activity]}`, `${recProfile().days} days of retention · ${recProfile().activity} activity`)}</span><button class="btn sm" data-a="recedit">${L2("Cambiar escenario", "Change scenario")}</button></div>
       <h3>${t("analysisSettings")}</h3>
@@ -3488,7 +3489,7 @@ const Panel = {
       <div class="row wrap"><button class="btn sm" data-a="backup">${t("backupAll")}</button><label class="btn sm">${t("restoreBackup")}<input type="file" id="g_restore" accept=".json,application/json" hidden></label></div>
       <p class="muted small" id="g_storage"></p>
       <p class="muted small">${t("credits")}</p>
-      <p class="muted small">Atalaya v1.4 · 16-10-2026</p>`;
+      <p class="muted small">Atalaya v1.5 · 17-10-2026</p>`;
   }
 };
 
@@ -3573,6 +3574,7 @@ function bindProject() {
     if (a === "vdel") confirmDialog(t("confirmDelVariant", { n: S.variant.name }), () => { P.variants = P.variants.filter(v => v.id !== S.variantId); S.variantId = P.variants[0].id; commit("vdel"); Panel.show(); });
     if (a === "compare") compareDialog();
     if (a === "recedit") Calc.open("store");
+    if (a === "manual") Manual.open();
     if (a === "projects") ProjectsDialog.open();
     if (a === "netedit") networkDialog(P, () => Panel.show());
     if (a === "fit") MapV.fit();
@@ -4088,9 +4090,9 @@ function projectBounds(V, padM = 14) {
   const a = Geo.dest([s, w], 225, padM * 1.41), b = Geo.dest([n, e], 45, padM * 1.41);
   return [a, b];
 }
-async function renderPlan(V, { max = 2200, base = Settings.v.base, legend = true } = {}) {
+async function renderPlan(V, { max = 2200, base = Settings.v.base, legend = true, bounds = null, subtitle = null, prices = true } = {}) {
   const keep = S.variantId; S.variantId = V.id; const A = analyze();
-  const M = await Tiles.mosaic(projectBounds(V), max, base);
+  const M = await Tiles.mosaic(bounds || projectBounds(V), max, base);
   const g = M.ctx, px = M.px, u = Math.max(1, M.W / 1400); // unidad de dibujo
   const poly = (pts, close = true) => { g.beginPath(); pts.forEach((p, i) => { const q = px(p); i ? g.lineTo(q[0], q[1]) : g.moveTo(q[0], q[1]); }); if (close) g.closePath(); };
   // obstáculos
@@ -4137,7 +4139,7 @@ async function renderPlan(V, { max = 2200, base = Settings.v.base, legend = true
   if (legend) {
     o.fillStyle = "#e7edf3"; o.font = `700 ${Math.round(20 * u)}px "IBM Plex Sans", sans-serif`; o.textBaseline = "middle"; o.fillText(S.project.name, 16 * u, 24 * u);
     o.fillStyle = "#93a1b0"; o.font = `500 ${Math.round(13 * u)}px "IBM Plex Sans", sans-serif`;
-    o.fillText(`${V.name} · ${t("detection")} ${pct(A.det)} · ${t("identification")} ${pct(A.id)} · ${V.devices.filter(d => d.type === "camera").length} ${t("cams")} · ${money(A.bom.total)}`, 16 * u, 48 * u);
+    o.fillText(subtitle || `${V.name} · ${t("detection")} ${pct(A.det)} · ${t("identification")} ${pct(A.id)} · ${V.devices.filter(d => d.type === "camera").length} ${t("cams")}${prices ? " · " + money(A.bom.total) : ""}`, 16 * u, 48 * u);
     o.textAlign = "right"; o.fillText(new Date().toLocaleDateString(Settings.v.lang === "en" ? "en-US" : "es-VE"), M.W - 16 * u, 24 * u); o.textAlign = "left";
     const items = [];
     const types = [...new Set(V.devices.map(d => d.type))]; types.forEach(tp => items.push({ c: TYPE_COLOR[tp], dot: true, l: t("type_" + tp) + " (" + V.devices.filter(d => d.type === tp).length + ")" }));
@@ -5197,7 +5199,7 @@ const Guide = {
       { t: L2("Sirenas", "Sirens"), ok: sirens.length > 0, d: sirens.length ? L2(`${sirens.length} sirenas.`, `${sirens.length} sirens.`) : L2("Agrega sirenas y su forma de disparo.", "Add sirens and how they trigger."), acts: [[L2("Agente de sirenas", "Siren agent"), () => AgentUI.sirens()], [L2("Colocar sirena", "Place siren"), () => Tools.set("place:siren")]] },
       { t: L2("Grabación y direcciones IP", "Recording and IP addresses"), ok: has("recorder") && V.devices.filter(d => d.type === "recorder").every(r => r.disks || r.hddTB != null) && V.devices.filter(d => ["camera", "recorder", "switch"].includes(d.type)).every(d => d.ip), d: L2(`Escenario: ${recLabel()} · ${recProfile().days} días.`, `Scenario: ${recLabel()} · ${recProfile().days} days.`), acts: [[L2("Agente de grabación", "Recording agent"), () => AgentUI.disks()], [L2("Asignar IP", "Assign IPs"), () => AgentUI.ips()], [L2("Calculadoras", "Calculators"), () => Calc.open("store")]] },
       { t: L2("Revisión final", "Final review"), ok: V.devices.length > 0 && !bad, d: L2(`${bad} problemas y ${warn} avisos.`, `${bad} problems and ${warn} warnings.`), acts: [[L2("Revisor", "Reviewer"), () => Fixer.open()], [L2("Revisar con IA", "Review with AI"), () => { Panel.open("ai"); AI.run("review"); }]] },
-      { t: L2("Entregables", "Deliverables"), ok: null, d: L2("Informe para la junta, órdenes para el instalador y pedido de cotización.", "Board report, installer work orders and quote request."), acts: [[t("exportPdf"), () => pdfDialog()], [L2("Órdenes de instalación", "Work orders"), () => WorkOrders.pdf()], [L2("Pedir cotización", "Request quote"), () => Quote.open()]] }
+      { t: L2("Entregables", "Deliverables"), ok: null, d: L2("Manual técnico de instalación y configuración, informe para la junta, órdenes para el instalador y pedido de cotización.", "Technical installation and configuration manual, board report, installer work orders and quote request."), acts: [[L2("Manual técnico", "Technical manual"), () => Manual.open()], [t("exportPdf"), () => pdfDialog()], [L2("Órdenes de instalación", "Work orders"), () => WorkOrders.pdf()], [L2("Pedir cotización", "Request quote"), () => Quote.open()]] }
     ];
   },
   panel() {
@@ -5332,14 +5334,365 @@ function agentsMenu(btn) {
     <h4>${L2("Herramientas", "Tools")}</h4>
     <button class="mi" data-v="calc">${svg("ruler")} ${L2("Calculadoras (lente y disco)", "Calculators (lens and storage)")}</button>
     <button class="mi" data-v="topo">${svg("chart")} ${L2("Topología de red", "Network topology")}</button>
+    <button class="mi" data-v="manual">${svg("book")} ${L2("Manual técnico de instalación y configuración", "Technical installation and configuration manual")}</button>
     <button class="mi" data-v="orders">${svg("file")} ${L2("Órdenes de instalación (PDF)", "Work orders (PDF)")}</button>
     <button class="mi" data-v="quote">${svg("budget")} ${L2("Pedir cotización", "Request a quote")}</button>`, v => {
-    const map = { auto: () => AutoDesign.open(), fix: () => Fixer.open(), guide: () => Panel.open("guide"), orders: () => WorkOrders.pdf(), quote: () => Quote.open(), calc: () => Calc.open("lens"), topo: () => Topo.open(),
+    const map = { auto: () => AutoDesign.open(), fix: () => Fixer.open(), manual: () => Manual.open(), guide: () => Panel.open("guide"), orders: () => WorkOrders.pdf(), quote: () => Quote.open(), calc: () => Calc.open("lens"), topo: () => Topo.open(),
       a_cams: () => AgentUI.cams(), a_posts: () => AgentUI.posts(), a_wifi: () => AgentUI.wifi(), a_conn: () => AgentUI.conn(), a_poles: () => AgentUI.poles(), a_power: () => AgentUI.power(), a_disks: () => AgentUI.disks(), a_sirens: () => AgentUI.sirens(), a_ips: () => AgentUI.ips() };
     if (S.project && !S.project.network && v.startsWith("a_")) { networkDialog(S.project, () => map[v]?.()); return; }
     map[v]?.();
   });
 }
+
+/* ---- manual.js ---- */
+/* ===== Manual técnico de instalación y configuración (PDF por variante) ===== */
+const byName = (a, b) => (a.name || "").localeCompare(b.name || "", undefined, { numeric: true });
+const Manual = {
+  /* ---------- ¿está listo el proyecto? ---------- */
+  readiness(V) {
+    const keep = S.variantId; S.variantId = V.id;
+    const a = analyze(), devs = V.devices, out = [];
+    const bad = a.warnings.filter(w => w.lvl === "bad"), warn = a.warnings.filter(w => w.lvl === "warn");
+    const fix = { ip: devs.some(d => ["camera", "recorder", "switch", "ap", "router"].includes(d.type) && !d.ip), ch: devs.some(d => d.type === "ap" && d.ch24 == null), disks: devs.some(d => d.type === "recorder" && !d.disks && d.hddTB == null), mount: devs.some(d => d.type === "camera" && !d.mount) };
+    if (!devs.some(d => d.type === "camera")) out.push({ lvl: "bad", msg: L2("La variante no tiene cámaras.", "The variant has no cameras.") });
+    if (bad.length) out.push({ lvl: "bad", msg: L2(`${bad.length} problemas graves (se listan como pendientes en el manual): ${bad.slice(0, 2).map(w => w.msg).join(" · ")}`, `${bad.length} serious problems (listed as pending in the manual): ${bad.slice(0, 2).map(w => w.msg).join(" · ")}`) });
+    if (warn.length) out.push({ lvl: "warn", msg: L2(`${warn.length} advertencias.`, `${warn.length} warnings.`) });
+    if (!stations(V).length) out.push({ lvl: "info", msg: L2("Sin puesto de control definido: el manual usará el grabador como centro del sistema.", "No control post defined: the manual will use the recorder as the system's center.") });
+    if (fix.ip) out.push({ lvl: "warn", msg: L2("Faltan direcciones IP fijas.", "Static IP addresses are missing."), auto: true });
+    if (fix.ch) out.push({ lvl: "warn", msg: L2("Faltan canales Wi-Fi en los puntos de acceso.", "Access points lack Wi-Fi channels."), auto: true });
+    if (fix.disks) out.push({ lvl: "warn", msg: L2("Faltan los discos de los grabadores.", "Recorder disks are missing."), auto: true });
+    if (fix.mount) out.push({ lvl: "warn", msg: L2("Faltan soportes de cámaras y postes.", "Camera mounts and poles are missing."), auto: true });
+    S.variantId = keep; analyze();
+    return { items: out, fix, bad: bad.length, warn: warn.length, ok: !bad.length && !Object.values(fix).some(Boolean) };
+  },
+  open() {
+    const P = S.project, vs = P.variants.filter(v => v.devices.length);
+    if (!vs.length) { toast(L2("Todavía no hay equipos para documentar.", "There are no devices to document yet."), "warn"); return; }
+    const cur = vs.find(v => v.id === S.variantId) || vs[0], key = !!Settings.v.geminiKey;
+    const rdHTML = v => { const r = this.readiness(v); return `<div class="wlist">${r.items.length ? r.items.map(it => `<div class="w ${it.lvl}"><i></i><span>${esc(it.msg)}</span></div>`).join("") : `<div class="w info"><i></i><span>${L2("El proyecto está completo: listo para documentar.", "The project is complete: ready to document.")}</span></div>`}</div>`; };
+    const secs = [["civil", L2("Obra civil, canalización y cableado", "Civil works, conduits and cabling")], ["install", L2("Instalación de cada equipo", "Installation of each device")], ["config", L2("Configuración (IP, grabación, Wi-Fi, alarmas)", "Configuration (IP, recording, Wi-Fi, alarms)")], ["tests", L2("Pruebas y puesta en marcha", "Tests and commissioning")], ["maint", L2("Mantenimiento", "Maintenance")], ["annex", L2("Anexos: as-built, pendientes y acta de entrega", "Annexes: as-built, pending items and handover")]];
+    const body = `<p class="muted small">${L2("Genera un manual técnico en PDF para el instalador: descripción del sistema, planos, herramientas, obra civil, tendido, instalación y orientación de cada equipo, configuración paso a paso, pruebas, mantenimiento y acta de entrega.", "Generates a technical PDF manual for the installer: system description, plans, tools, civil works, cabling, installation and aiming of each device, step-by-step configuration, tests, maintenance and handover.")}</p>
+      ${vs.length > 1 ? `<label class="fld"><span>${t("variant")}</span><select id="mn_v">${vs.map(v => `<option value="${v.id}" ${v === cur ? "selected" : ""}>${esc(v.name)}</option>`).join("")}</select></label>` : ""}
+      <h3>${L2("Revisión antes de generar", "Check before generating")}</h3><div id="mn_rd">${rdHTML(cur)}</div>
+      <label class="fld chk"><input type="checkbox" id="mn_auto" checked> <span>${L2("Completar automáticamente lo que falte (IP, canales, discos, soportes)", "Automatically complete what is missing (IPs, channels, disks, mounts)")}</span></label>
+      <h3>${L2("Contenido", "Contents")}</h3>${secs.map(([k, l]) => `<label class="opt"><input type="checkbox" data-sec="${k}" checked> ${l}</label>`).join("")}
+      <label class="fld chk"><input type="checkbox" id="mn_ai" ${key ? "" : "disabled"}> <span>${L2("Agregar pasos específicos por modelo redactados por la IA (Gemini)", "Add model-specific steps written by the AI (Gemini)")}${key ? "" : `<br><small class="muted">${L2("Configura tu clave de Gemini en Ajustes para usarlo.", "Set your Gemini key in Settings to use it.")}</small>`}</span></label>
+      <div class="row2"><label class="fld"><span>${L2("Instalador (opcional)", "Installer (optional)")}</span><input id="mn_inst" class="in" value="${esc(P.manual?.installer || "")}"></label>
+      <label class="fld"><span>${L2("Recibe (opcional)", "Received by (optional)")}</span><input id="mn_recv" class="in" value="${esc(P.manual?.receiver || "")}"></label></div>`;
+    const d = dialog({ title: L2("Manual técnico de instalación y configuración", "Technical installation and configuration manual"), wide: true, body, actions: [{ label: t("cancel") }, { label: L2("Generar manual (PDF)", "Generate manual (PDF)"), kind: "pri", onClick: bg => {
+      const opt = { vid: $("#mn_v", bg)?.value || cur.id, auto: $("#mn_auto", bg).checked, ai: $("#mn_ai", bg).checked, secs: Object.fromEntries($$("[data-sec]", bg).map(c => [c.dataset.sec, c.checked])), installer: $("#mn_inst", bg).value.trim(), receiver: $("#mn_recv", bg).value.trim() };
+      P.manual = { installer: opt.installer, receiver: opt.receiver }; saveProjectSoon();
+      setTimeout(() => this.generate(opt), 50);
+    } }] });
+    d.el.addEventListener("change", e => { if (e.target.id === "mn_v") $("#mn_rd", d.el).innerHTML = rdHTML(S.project.variants.find(v => v.id === e.target.value)); });
+  },
+  /* ---------- completa datos que faltan ---------- */
+  prepare(V) {
+    if (S.variantId !== V.id) switchVariant(V.id);
+    const r = this.readiness(V), done = [];
+    if (r.fix.mount) { polesAgent(Agents.ctx()); done.push(L2("soportes y postes", "mounts and poles")); }
+    balanceRecorders(V);
+    if (r.fix.disks) { storageAgent(V, recProfile().days); done.push(L2("discos", "disks")); }
+    if (r.fix.ch) { channelPlan(V.devices.filter(d => d.type === "ap")); done.push(L2("canales Wi-Fi", "Wi-Fi channels")); }
+    if (r.fix.ip || done.length) { assignIPs(V); done.push(L2("direcciones IP", "IP addresses")); }
+    if (done.length) commit("manual");
+    return done;
+  },
+  /* ---------- pasos por modelo redactados por la IA ---------- */
+  async aiSteps(V, say) {
+    const g = graph(), cnt = {}; V.devices.forEach(d => { const m = model(d); const k = `${t("type_" + d.type)} · ${m.brand || ""} ${m.name || d.model}`; cnt[k] = (cnt[k] || 0) + 1; });
+    const p = recProfile(), N = netDef();
+    const ctx = { network: N.label, internet: N.internet, models: Object.entries(cnt).map(([k, n]) => `${n} × ${k}`), ipPlan: `10.10.0.0/16, ${L2("máscara", "mask")} ${IP_MASK}, gateway ${V.devices.find(d => d.type === "router")?.ip || "10.10.0.1"}`,
+      recording: { mode: p.mode, fps: p.fps, codec: p.codec, days: p.days, motionHoursPerDay: p.motionH }, recorders: V.devices.filter(d => d.type === "recorder").map(r => ({ name: r.name, model: model(r).name, ip: r.ip, cameras: recorderStats(r, g).cams.length, disks: r.disks })),
+      aps: V.devices.filter(d => d.type === "ap").map(a => ({ name: a.name, model: model(a).name, ch24: a.ch24, ch5: a.ch5, ip: a.ip })), posts: stations(V).map(s => ({ name: s.name, role: mainStation(V) === s ? "main" : "secondary", recording: s.recMode === "view" ? "view only" : "records" })) };
+    const prompt = `TAREA: redacta el capítulo de CONFIGURACIÓN de un manual técnico de instalación para este sistema de videovigilancia.
+Para cada familia de equipos del proyecto (grabadores, cámaras, puntos de acceso, switches, puentes, router, sirenas y puestos de visualización) escribe de 4 a 8 pasos concretos y ordenados, usando los valores del proyecto (IP, canales, fps, compresión, días de grabación).
+Si no estás seguro del nombre exacto de un menú, describe la función sin inventar rutas. Incluye advertencias importantes (seguridad, contraseñas, firmware).
+Escribe en ${Settings.v.lang === "en" ? "inglés" : "español"}.
+Responde SOLO con JSON: {"reply":"resumen de una línea","sections":[{"title":"...","steps":["..."],"warnings":["..."]}]}
+DATOS DEL PROYECTO:
+${JSON.stringify(ctx)}`;
+    say(L2("La IA está redactando los pasos por modelo…", "The AI is writing the model-specific steps…"));
+    const res = await AI.call([{ text: prompt }], { withHistory: false });
+    return (Array.isArray(res.sections) ? res.sections : []).slice(0, 16).map(s => ({ title: String(s.title || "").slice(0, 120), steps: (Array.isArray(s.steps) ? s.steps : []).slice(0, 12).map(x => String(x).slice(0, 600)), warnings: (Array.isArray(s.warnings) ? s.warnings : []).slice(0, 6).map(x => String(x).slice(0, 400)) })).filter(s => s.title && s.steps.length);
+  },
+  /* ---------- generación ---------- */
+  async generate(opt) {
+    const prog = dialog({ title: L2("Manual técnico", "Technical manual"), body: `<p><i class="spin"></i> <span id="mn_prog">${L2("Preparando…", "Preparing…")}</span></p>` });
+    const say = s => { const el = $("#mn_prog"); if (el) el.textContent = s; };
+    try {
+      const V = S.project.variants.find(v => v.id === opt.vid) || S.variant;
+      if (S.variantId !== V.id) switchVariant(V.id);
+      const done = opt.auto ? this.prepare(V) : [];
+      let ai = null, aiErr = null;
+      if (opt.ai) { try { ai = await this.aiSteps(V, say); } catch (e) { aiErr = e.message || String(e); } }
+      say(L2("Dibujando planos y armando el PDF…", "Drawing plans and building the PDF…")); await sleep0();
+      const blob = await this.pdf(V, opt, ai, aiErr, say);
+      prog.close();
+      Files.deliver(blob, `${slug(S.project.name)}_${slug(V.name)}_${L2("manual_tecnico", "technical_manual")}_${stamp()}.pdf`);
+      if (done.length) toast(L2(`Antes de generar se completaron: ${done.join(", ")}.`, `Completed before generating: ${done.join(", ")}.`), "ok");
+    } catch (e) { console.error(e); prog.close(); toast(L2("No se pudo generar el manual: ", "Could not generate the manual: ") + (e.message || e), "bad"); }
+  },
+  async pdf(V, opt, ai, aiErr, say) {
+    const { jsPDF } = window.jspdf, P = S.project, N = netDef(P), g = graph(), a = analyze(), b = a.bom, p = recProfile(), T = s => pdfSafe(s);
+    const doc = new jsPDF({ unit: "mm", format: "a4" }), W = 210, H = 297, M = 14, CW = W - 2 * M, INK = [30, 36, 44], MUT = [110, 120, 132], ACC = [242, 165, 65];
+    const lang = Settings.v.lang === "en" ? "en" : "es", devs = V.devices.slice().sort(byName), of = tp => devs.filter(d => d.type === tp);
+    const cams = of("camera"), recs = of("recorder"), sws = of("switch"), aps = of("ap"), sirens = of("siren"), ups = of("power"), poles = of("pole"), posts = stations(V).slice().sort((x, y) => (y === mainStation(V)) - (x === mainStation(V)) || byName(x, y));
+    const bridges = V.links.filter(l => l.kind === "bridge"), has = k => V.links.some(l => l.kind === k);
+    let y = M, chap = 0, sub = 0; const toc = [];
+    const ensure = h => { if (y + h > H - 16) { doc.addPage(); y = M; } };
+    const h1 = s => { doc.addPage(); y = M; chap++; sub = 0; const tt = `${chap}. ${s}`; toc.push({ lvl: 1, t: tt, p: doc.getNumberOfPages() }); doc.setFont("helvetica", "bold"); doc.setFontSize(17); doc.setTextColor(...INK); doc.text(T(tt), M, y + 7); y += 11; doc.setDrawColor(...ACC); doc.setLineWidth(.9); doc.line(M, y, M + 34, y); y += 7; };
+    const h2 = (s, room = 30) => { sub++; ensure(room); const tt = `${chap}.${sub} ${s}`; toc.push({ lvl: 2, t: tt, p: doc.getNumberOfPages() }); doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.setTextColor(...INK); doc.text(T(tt), M, y + 5); y += 9; };
+    const h3 = s => { ensure(10); doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.setTextColor(...INK); doc.text(T(s), M, y + 4); y += 7; };
+    const para = (s, size = 9.5, col = INK) => { doc.setFont("helvetica", "normal"); doc.setFontSize(size); doc.setTextColor(...col); doc.splitTextToSize(T(s), CW).forEach(l => { ensure(size * .46); doc.text(l, M, y + size * .36); y += size * .46; }); y += 2; };
+    const bullets = (arr, numbered = false, size = 9.3) => { doc.setFont("helvetica", "normal"); doc.setFontSize(size); doc.setTextColor(...INK); arr.filter(Boolean).forEach((s, i) => { const ls = doc.splitTextToSize(T(s), CW - 7); ensure(ls.length * size * .44 + 1); doc.text(numbered ? `${i + 1}.` : "•", M + 1, y + size * .36); ls.forEach((l, k) => doc.text(l, M + 7, y + size * .36 + k * size * .44)); y += ls.length * size * .44 + 1.4; }); y += 1.5; };
+    const note = (s, kind = "info") => { doc.setFont("helvetica", "normal"); doc.setFontSize(9); const ls = doc.splitTextToSize(T(s), CW - 10), h = ls.length * 4.1 + 5; ensure(h + 2); const col = kind === "warn" ? [253, 243, 222] : [232, 242, 250], bar = kind === "warn" ? [242, 165, 65] : [60, 150, 200]; doc.setFillColor(...col); doc.rect(M, y, CW, h, "F"); doc.setFillColor(...bar); doc.rect(M, y, 1.4, h, "F"); doc.setTextColor(...INK); ls.forEach((l, k) => doc.text(l, M + 5, y + 4.6 + k * 4.1)); y += h + 4; };
+    const table = (head, body, o = {}) => { if (!body.length) return; doc.autoTable({ startY: y, head: [head.map(T)], body: body.map(r => r.map(c => c && typeof c === "object" ? { ...c, content: T(c.content) } : T(c ?? ""))), margin: { left: M, right: M, bottom: 16 }, styles: { font: "helvetica", fontSize: 7.8, cellPadding: 1.4, textColor: INK, valign: "middle", overflow: "linebreak" }, headStyles: { fillColor: [24, 32, 42], textColor: 255 }, alternateRowStyles: { fillColor: [245, 247, 249] }, ...o }); y = doc.lastAutoTable.finalY + 5; };
+    const imgH = (cv, maxH = 200) => cv.height * Math.min(CW / cv.width, maxH / cv.height);
+    const img = (cv, maxH = 200) => { const k = Math.min(CW / cv.width, maxH / cv.height), w = cv.width * k, h = cv.height * k; ensure(h + 2); doc.addImage(cv.toDataURL("image/jpeg", .82), "JPEG", M + (CW - w) / 2, y, w, h); y += h + 4; };
+    const figure = (title, cv, maxH) => { h2(title, imgH(cv, maxH) + 14); img(cv, maxH); };
+    const box = "[   ]", deg0 = v => v == null ? "" : `${Math.round(v)}°`;
+    const recOf = c => cameraRecorder(c, g)?.rec, chanOf = new Map();
+    recs.forEach(r => cams.filter(c => recOf(c) === r).forEach((c, i) => chanOf.set(c, { r, ch: i + 1 })));
+    const postOf = d => stationOf(d, V) || (posts.length ? posts.slice().sort((x, z) => Geo.dist(x.pos, d.pos) - Geo.dist(z.pos, d.pos))[0] : null);
+    const brands = new Set(devs.filter(d => !["pole", "power", "display", "station"].includes(d.type)).map(d => model(d).brand).filter(Boolean)); bridges.forEach(l => { const m = Catalog.get(l.model); if (m) brands.add(m.brand); });
+    const isMat = r => /^(cat6|fiber|fiber-end|alarm|mat-|hdd-)/.test(r.id), eq = b.list.filter(r => !isMat(r)).sort((x, z) => z.qty - x.qty), mats = b.list.filter(isMat);
+    const kindTxt = k => t("kind_" + k);
+
+    /* ---- portada ---- */
+    doc.setFillColor(17, 22, 28); doc.rect(0, 0, W, 92, "F");
+    doc.setTextColor(242, 165, 65); doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.text(T(L2("MANUAL TÉCNICO", "TECHNICAL MANUAL")), M, 26);
+    doc.setTextColor(255); doc.setFontSize(23); doc.splitTextToSize(T(L2("Instalación y configuración del sistema de seguridad", "Security system installation and configuration")), CW).forEach((l, i) => doc.text(l, M, 40 + i * 10));
+    doc.setFont("helvetica", "normal"); doc.setFontSize(12); doc.setTextColor(210); doc.text(T(`${P.name} · ${V.name}`), M, 72);
+    doc.setFontSize(9.5); doc.text(T(new Date().toLocaleDateString(lang === "en" ? "en-US" : "es-VE", { year: "numeric", month: "long", day: "numeric" })), M, 81);
+    y = 104;
+    const kv = [[L2("Tipo de red", "Network type"), N.label + (N.internet ? L2(" · con internet", " · with internet") : L2(" · sin internet", " · no internet"))], [L2("Perímetro", "Perimeter"), `${fmt(a.perimeter)} m · ${L2("franja exterior", "outer band")} ${a.band} m`], [L2("Cámaras", "Cameras"), `${cams.length} · ${L2("detección", "detection")} ${pct(a.det)} · ${L2("de noche", "at night")} ${pct(nightCoverage())}`],
+      [L2("Puestos de control", "Control posts"), posts.length ? posts.map(s => `${s.name} (${mainStation(V) === s ? L2("principal", "main") : L2("secundario", "secondary")})`).join(", ") : "—"], [L2("Grabadores", "Recorders"), `${recs.length} · ${recLabel(p)} · ${p.days} ${L2("días", "days")}`],
+      [L2("Red", "Network"), `${sws.length} switches · ${aps.length} AP · ${bridges.length} ${L2("puentes", "bridges")}`], [L2("Cableado", "Cabling"), `Cat6 ${fmt(b.cable.cat6)} m${b.cable.fiber ? ` · ${L2("fibra", "fiber")} ${fmt(b.cable.fiber)} m` : ""}`], [L2("Sirenas y respaldo", "Sirens and backup"), `${sirens.length} ${L2("sirenas", "sirens")} · ${ups.length} UPS`]];
+    table([L2("Resumen del sistema", "System summary"), ""], kv, { showHead: "never", styles: { fontSize: 10, cellPadding: 2.2, textColor: INK }, columnStyles: { 0: { cellWidth: 52, fontStyle: "bold" } } });
+    if (opt.installer || opt.receiver) { para(`${opt.installer ? L2("Instalador: ", "Installer: ") + opt.installer : ""}${opt.installer && opt.receiver ? "   ·   " : ""}${opt.receiver ? L2("Recibe: ", "Received by: ") + opt.receiver : ""}`, 10); }
+    note(L2("Este manual se generó a partir del diseño de la variante. Las distancias, coordenadas, rumbos y señales son de diseño: verifícalas en sitio antes de fijar cada equipo. Los pasos de configuración son generales; ante dudas, sigue el manual del fabricante de cada modelo.", "This manual was generated from the variant's design. Distances, coordinates, headings and signals are design values: verify them on site before fixing each device. Configuration steps are general; when in doubt, follow each model's manufacturer manual."));
+
+    /* ---- 1. descripción del sistema ---- */
+    h1(L2("Descripción del sistema", "System description"));
+    para(L2(`El sistema vigila ${fmt(a.perimeter)} m de perímetro con ${cams.length} cámaras orientadas hacia la franja exterior de ${a.band} m. La red es «${N.label}»: ${N.desc}`, `The system watches ${fmt(a.perimeter)} m of perimeter with ${cams.length} cameras aimed at the ${a.band} m outer band. The network is “${N.label}”: ${N.desc}`));
+    if (posts.length) para(L2(`Hay ${posts.length} puesto(s) de control. ${posts.length > 1 ? (posts.some(s => s.recMode === "view") ? "El puesto principal graba y los secundarios visualizan por la red." : "Cada puesto graba las cámaras de su zona y todos están enlazados para ver el sistema completo.") : ""}`, `There are ${posts.length} control post(s). ${posts.length > 1 ? (posts.some(s => s.recMode === "view") ? "The main post records and the secondary posts view over the network." : "Each post records its zone's cameras and all are linked to view the whole system.") : ""}`));
+    para(L2(`Grabación: ${recLabel(p)}, ${p.days} días de respaldo. Detección diurna ${pct(a.det)}, identificación ${pct(a.id)}, detección nocturna ${pct(nightCoverage())}.`, `Recording: ${recLabel(p)}, ${p.days} days of retention. Day detection ${pct(a.det)}, identification ${pct(a.id)}, night detection ${pct(nightCoverage())}.`));
+    if (posts.length) { h2(L2("Puestos de control", "Control posts")); table([L2("Puesto", "Post"), L2("Función", "Role"), L2("Grabación", "Recording"), L2("Equipos", "Equipment"), L2("Graba", "Records"), L2("Ve", "Views")], posts.map(s => { const st = stationStats(s, g); return [s.name, mainStation(V) === s ? L2("Principal", "Main") : L2("Secundario", "Secondary"), s.recMode === "view" ? L2("Solo visualiza", "View only") : L2("Graba su zona", "Records its zone"), st.gear.map(x => x.name).join(", "), st.local.length, st.visible.length]; }), { columnStyles: { 3: { cellWidth: 70 } } }); }
+    h2(L2("Equipos del proyecto", "Project equipment"));
+    table([L2("Cant.", "Qty"), L2("Equipo", "Equipment")], eq.map(r => [fmt(r.qty), r.name]), { columnStyles: { 0: { cellWidth: 16, halign: "right" } } });
+    say(L2("Dibujando el plano general…", "Drawing the general plan…"));
+    try { const r = await renderPlan(V, { max: 2000, prices: false }); figure(L2("Plano general", "General plan"), r.canvas, 205); } catch (e) { console.warn(e); h2(L2("Plano general", "General plan")); para(L2("No se pudo dibujar el plano.", "Could not draw the plan."), 9, MUT); }
+    if (posts.length > 1) {
+      for (const s of posts) {
+        const zone = devs.filter(d => postOf(d) === s); if (!zone.length) continue;
+        let s0 = 90, w0 = 180, n0 = -90, e0 = -180; zone.forEach(d => { s0 = Math.min(s0, d.pos[0]); n0 = Math.max(n0, d.pos[0]); w0 = Math.min(w0, d.pos[1]); e0 = Math.max(e0, d.pos[1]); });
+        say(L2(`Dibujando la zona de ${s.name}…`, `Drawing ${s.name}'s zone…`));
+        try { const r = await renderPlan(V, { max: 1800, prices: false, bounds: [Geo.dest([s0, w0], 225, 20), Geo.dest([n0, e0], 45, 20)], subtitle: `${V.name} · ${L2("zona de", "zone of")} ${s.name} · ${zone.filter(d => d.type === "camera").length} ${t("cams")}` }); figure(L2(`Zona del puesto ${s.name}`, `Zone of post ${s.name}`), r.canvas, 200); } catch (e) { console.warn(e); }
+      }
+    }
+    if (V.links.length) { try { const cv = await Topo.png(); figure(L2("Topología de red", "Network topology"), cv, 150); } catch (e) { console.warn(e); } }
+
+    /* ---- 2. preparación ---- */
+    h1(L2("Preparación de la obra", "Site preparation"));
+    h2(L2("Orden de trabajo recomendado", "Recommended work order"));
+    bullets([L2("Replanteo: ubica en sitio cada equipo con las coordenadas de las tablas (GPS del teléfono) y confirma vista libre y acceso.", "Layout: locate each device on site with the table coordinates (phone GPS) and confirm clear view and access."),
+      poles.length || has("fiber") || has("cat6") ? L2("Obra civil: hoyos y bases de postes y canalizaciones. Los postes empotrados necesitan 7 días de fraguado antes de colgar equipos pesados.", "Civil works: pole holes and bases and conduits. Buried poles need 7 days of curing before mounting heavy gear.") : null,
+      L2("Puestos de control: energía, UPS, rack o mesa, switch principal, grabador y monitor.", "Control posts: power, UPS, rack or desk, main switch, recorder and monitor."),
+      L2("Tendido de cables y fibra; etiqueta ambos extremos y prueba cada tramo antes de conectar.", "Run cables and fiber; label both ends and test each run before connecting."),
+      sws.length > posts.length ? L2("Nodos del perímetro: gabinete, switch PoE, UPS y puesta a tierra.", "Perimeter nodes: cabinet, PoE switch, UPS and grounding.") : null,
+      aps.length || bridges.length ? L2("Puntos de acceso y puentes: montar, alinear y medir señal.", "Access points and bridges: mount, align and measure signal.") : null,
+      L2("Cámaras: montar, conectar y orientar según la tabla de cámaras.", "Cameras: mount, connect and aim per the camera table."),
+      sirens.length ? L2("Sirenas y salidas de alarma.", "Sirens and alarm outputs.") : null,
+      L2("Configuración (capítulo de configuración) y pruebas de puesta en marcha.", "Configuration (configuration chapter) and commissioning tests."),
+      L2("Entrega: as-built completo, contraseñas entregadas por separado y acta firmada.", "Handover: complete as-built, passwords delivered separately and signed record.")], true);
+    h2(L2("Herramientas", "Tools"));
+    const buried = poles.some(x => poleSpec(x).inst === "buried"), plate = poles.some(x => poleSpec(x).inst === "plate");
+    bullets([L2("Escalera de extensión o andamio; arnés para trabajos sobre 1,8 m", "Extension ladder or scaffold; harness for work above 1.8 m"), L2("Taladro percutor y brocas para concreto de 6 a 12 mm; tacos y tornillería inoxidable", "Hammer drill and 6–12 mm masonry bits; anchors and stainless hardware"), L2("Crimpadora RJ45, conectores Cat6 para exterior y botas", "RJ45 crimper, outdoor Cat6 connectors and boots"), L2("Probador o certificador de cable de red", "Network cable tester or certifier"), L2("Multímetro", "Multimeter"),
+      L2("Brújula o app de brújula (rumbo) e inclinómetro (app) para orientar cámaras", "Compass or compass app (heading) and inclinometer app to aim cameras"), L2("Laptop con navegador y cable de red para configurar", "Laptop with browser and network cable for setup"), L2("Etiquetadora o marcador indeleble, cinta métrica y nivel", "Label maker or permanent marker, tape measure and level"),
+      has("fiber") ? L2("Kit de terminación de fibra (conectores mecánicos o fusionadora) y medidor de potencia óptica", "Fiber termination kit (mechanical connectors or fusion splicer) and optical power meter") : null,
+      buried ? L2("Ahoyadora o barra, pala, carretilla y mezcla de concreto", "Post-hole digger or bar, shovel, wheelbarrow and concrete mix") : null, plate ? L2("Pernos químicos M12 y pistola de aplicación", "M12 chemical anchors and dispensing gun") : null,
+      aps.length ? L2("Teléfono con app de análisis Wi-Fi para medir dBm", "Phone with a Wi-Fi analyzer app to measure dBm") : null, bridges.length ? L2("Binoculares y la app o interfaz del puente para alinear", "Binoculars and the bridge's app or web UI for alignment") : null,
+      has("alarm") ? L2("Cable 2×18 AWG, relés y fuente de 12 V", "2×18 AWG cable, relays and 12 V supply") : null]);
+    if (mats.length) { h2(L2("Materiales a tener en obra", "Materials to have on site")); table([L2("Cant.", "Qty"), L2("Material", "Material")], mats.map(r => [/ \(m\)$/.test(r.name) ? fmt(r.qty) + " m" : fmt(r.qty), r.name.replace(/ \(m\)$/, "")]), { columnStyles: { 0: { cellWidth: 22, halign: "right" } } }); }
+    h2(L2("Seguridad en la obra", "Site safety"));
+    bullets([L2("Trabajo en altura: escalera asegurada y arnés sobre 1,8 m; nunca trabajar solo.", "Work at height: secured ladder and harness above 1.8 m; never work alone."), L2("Electricidad: corta el circuito antes de conectar tomas o UPS; usa tomas con tierra.", "Electricity: switch off the circuit before wiring outlets or UPS; use grounded outlets."), L2("No instales con lluvia ni tormenta eléctrica.", "Do not install in rain or lightning storms."),
+      L2("Antes de excavar, verifica tuberías de agua, gas y electricidad existentes; señaliza las zanjas.", "Before digging, check existing water, gas and power lines; mark trenches."), has("fiber") ? L2("No mires el extremo de una fibra conectada.", "Never look into the end of a live fiber.") : null,
+      L2("Privacidad: no orientes cámaras hacia ventanas o patios de vecinos; usa máscaras de privacidad cuando la escena lo incluya.", "Privacy: do not aim cameras at neighbors' windows or yards; use privacy masks when the scene includes them.")]);
+
+    /* ---- 3. obra civil y cableado ---- */
+    if (opt.secs.civil) {
+      h1(L2("Obra civil, canalización y cableado", "Civil works, conduits and cabling"));
+      if (poles.length) {
+        h2(L2("Postes", "Poles"));
+        table([L2("Poste", "Pole"), L2("Coordenadas", "Coordinates"), L2("Altura", "Height"), L2("Instalación", "Installation"), L2("Detalle", "Detail"), L2("Carga", "Carries")], poles.map(x => { const ps = poleSpec(x); return [x.name, `${x.pos[0].toFixed(6)}, ${x.pos[1].toFixed(6)}`, `${ps.H} m`, ps.inst === "buried" ? L2("Empotrado", "Buried") : ps.inst === "plate" ? L2("Placa base", "Base plate") : L2("Adosado a pared", "Wall-mounted"), ps.rows.map(r => `${r[0]}: ${r[1]}`).join("\n"), devs.filter(d => d !== x && d.type !== "pole" && Geo.dist(d.pos, x.pos) <= 1.5).map(d => d.name).join(", ")]; }), { columnStyles: { 1: { cellWidth: 30 }, 4: { cellWidth: 68 } } });
+      }
+      h2(L2("Canalización", "Conduits"));
+      bullets([L2("Tubería PVC o EMT de 3/4\" a 1\" según la cantidad de cables; en tramos enterrados, a 40–60 cm de profundidad con cinta de señalización encima.", "3/4\" to 1\" PVC or EMT conduit depending on cable count; buried runs at 40–60 cm depth with warning tape above."), L2("Cajas de paso o tanquillas cada 30–50 m y en cada cambio de dirección.", "Pull boxes or handholes every 30–50 m and at every change of direction."),
+        L2("Separa los cables de datos de los eléctricos al menos 30 cm o crúzalos a 90°.", "Keep data cables at least 30 cm from power cables or cross them at 90°."), L2("Sobre muros, fija la tubería cada metro, con curvas suaves; sella las entradas con silicona o espuma y deja goteros.", "On walls, fix conduit every metre with gentle bends; seal entries with silicone or foam and leave drip loops.")]);
+      h2(L2("Cable de red Cat6", "Cat6 network cable"));
+      bullets([L2("Cable Cat6 de exterior (chaqueta UV, idealmente con gel en tramos enterrados); sin empalmes.", "Outdoor Cat6 (UV jacket, ideally gel-filled for buried runs); no splices."), L2("Máximo 100 m por tramo, contando las subidas a cada equipo. Ponchado T568B en ambos extremos.", "100 m max per run, including risers to each device. T568B termination at both ends."),
+        L2("Radio de curvatura mayor a 4 veces el diámetro del cable; no lo aplastes con abrazaderas.", "Bend radius over 4 times the cable diameter; do not crush it with clamps."), L2("Etiqueta ambos extremos con el nombre del tramo de la tabla (por ejemplo «SW02→C14»).", "Label both ends with the run name from the table (e.g. “SW02→C14”)."), L2("Prueba cada tramo con el probador antes de conectar equipos.", "Test each run with the tester before connecting devices.")]);
+      if (has("fiber")) { h2(L2("Fibra óptica", "Optical fiber")); bullets([L2("Fibra monomodo de exterior (9/125) con módulos SFP compatibles en ambos extremos (misma longitud de onda o pareja BiDi).", "Outdoor single-mode fiber (9/125) with compatible SFP modules at both ends (same wavelength or a BiDi pair)."), L2("Radio de curvatura mayor a 20 veces el diámetro; deja reserva de 3 m en cada extremo.", "Bend radius over 20 times the diameter; leave 3 m of slack at each end."), L2("Mide la potencia óptica recibida y anótala en las pruebas.", "Measure the received optical power and record it in the tests.")]); }
+      if (has("alarm")) { h2(L2("Cable de alarma", "Alarm cable")); bullets([L2("Cable 2×18 AWG desde la salida de alarma del grabador o cámara hasta el relé de cada sirena; más de 300 m, usa 2×16 AWG.", "2×18 AWG from the recorder or camera alarm output to each siren's relay; over 300 m use 2×16 AWG."), L2("La sirena se alimenta con la fuente de 12 V a través del contacto del relé, nunca desde la salida de alarma.", "The siren is powered by the 12 V supply through the relay contact, never from the alarm output.")]); }
+      h2(L2("Tabla de tramos y enlaces", "Runs and links table"));
+      table([L2("Desde", "From"), L2("Hasta", "To"), L2("Tipo", "Type"), L2("Metros a comprar", "Metres to buy"), L2("Etiqueta", "Label"), L2("Notas", "Notes")], V.links.map(l => { const A2 = S.dev(l.a), B2 = S.dev(l.b); if (!A2 || !B2) return null; const m = ["cat6", "alarm"].includes(l.kind) ? cableRun(A2, B2) : l.kind === "fiber" ? linkLength(l) * Settings.v.routing : null; return [A2.name, B2.name, kindTxt(l.kind), m != null ? fmt(Math.ceil(m)) + " m" : "—", `${A2.name}→${B2.name}`, l.kind === "bridge" ? (Catalog.get(l.model)?.name || "") + ` · ${fmt(linkLength(l))} m` : ["wifi_lan", "wifi_inet"].includes(l.kind) ? L2(`Señal estimada ${wifiEstimate(l)?.rssi} dBm`, `Estimated signal ${wifiEstimate(l)?.rssi} dBm`) : ""]; }).filter(Boolean).sort((r1, r2) => r1[0].localeCompare(r2[0], undefined, { numeric: true })));
+      h2(L2("Puesta a tierra y protección", "Grounding and protection"));
+      bullets([L2("Todo poste metálico con equipos y todo poste de 5 m o más: barra de cobre de 1,5 m y cable 6 AWG.", "Every metal pole carrying equipment and every pole of 5 m or more: 1.5 m copper rod and 6 AWG wire."), L2("Gabinetes y racks unidos a tierra; UPS y switches en tomas con tierra verificada.", "Cabinets and racks bonded to ground; UPS and switches on verified grounded outlets."), devs.some(d => d.spd) ? L2("Instala los protectores de sobretensión Ethernet en ambos extremos de los tramos marcados (cámaras con tramos de 25 m o más).", "Install the Ethernet surge protectors at both ends of the marked runs (cameras with runs of 25 m or more).") : null]);
+    }
+
+    /* ---- 4. instalación ---- */
+    if (opt.secs.install) {
+      h1(L2("Instalación de los equipos", "Device installation"));
+      h2(L2("Puestos de control y grabadores", "Control posts and recorders"));
+      bullets([L2("Instala los discos duros antes de encender el grabador.", "Install the hard drives before powering the recorder on."), L2("Ubica grabador, switch y router en rack o mesa ventilada, lejos del sol y la humedad.", "Place recorder, switch and router in a ventilated rack or desk, away from sun and moisture."), L2("Todo el equipo del puesto va conectado al UPS; no conectes impresoras, cafeteras ni aires al UPS.", "All post equipment goes on the UPS; never plug printers, coffee makers or AC units into it."), L2("Monitor por HDMI a menos de 15 m del grabador; más lejos, extensor HDMI por Cat6.", "Monitor over HDMI within 15 m of the recorder; farther, use an HDMI-over-Cat6 extender.")]);
+      table([L2("Grabador", "Recorder"), L2("Modelo", "Model"), L2("Puesto", "Post"), L2("Discos", "Disks"), L2("Cámaras / canales", "Cameras / channels"), "IP"], recs.map(r => { const st = recorderStats(r, g); return [r.name, model(r).name || r.model, postOf(r)?.name || "", r.disks ? `${r.disks.n} × ${r.disks.tb} TB` : r.hddTB != null ? `${r.hddTB} TB` : "—", `${st.cams.length} / ${st.channels}`, r.ip || ""]; }));
+      if (sws.length) {
+        h2(L2("Switches y nodos del perímetro", "Switches and perimeter nodes"));
+        bullets([L2("Gabinete IP65 a unos 1,5 m de altura, en sombra si es posible, con su UPS y puesta a tierra.", "IP65 cabinet about 1.5 m high, in shade if possible, with its UPS and grounding."), L2("Conecta cada puerto según la tabla de tramos y etiquétalo.", "Patch each port per the runs table and label it."), L2("Verifica que el consumo PoE quede dentro del presupuesto del switch.", "Check that PoE draw stays within the switch budget.")]);
+        table([L2("Switch", "Switch"), L2("Modelo", "Model"), L2("Ubicación", "Location"), L2("PoE en uso", "PoE in use"), L2("Enlace hacia arriba", "Uplink"), "IP"], sws.map(sw => { const fed = poeFed(sw), w = fed.reduce((s2, x) => s2 + poeW(x), 0), m = model(sw), up = linksOf(sw).filter(l => !fed.includes(other(l, sw))).map(l => `${other(l, sw)?.name} (${kindTxt(l.kind)})`).join(", "); return [sw.name, m.name || sw.model, stationOf(sw, V)?.name || `${sw.pos[0].toFixed(6)}, ${sw.pos[1].toFixed(6)}`, `${fmt(w)} / ${m.poeBudget || 0} W · ${fed.length}/${m.poePorts || 0}`, up, sw.ip || ""]; }), { columnStyles: { 2: { cellWidth: 32 } } });
+      }
+      if (aps.length || bridges.length) {
+        h2(L2("Puntos de acceso y puentes inalámbricos", "Access points and wireless bridges"));
+        bullets([L2("Monta cada AP a la altura indicada, con el frente hacia las cámaras que atiende y sin obstáculos metálicos cerca.", "Mount each AP at the given height, facing the cameras it serves, with no metal obstacles nearby."), L2("Alimenta por PoE desde el switch o con su inyector; usa protector de sobretensión en exteriores.", "Power over PoE from the switch or its injector; use a surge protector outdoors."), L2("Puentes: monta ambos extremos con vista libre, alinea primero a ojo y luego afina con el indicador de señal; aprieta y sella.", "Bridges: mount both ends with clear view, align by eye first and then fine-tune with the signal indicator; tighten and seal."), L2("Mide la señal en cada cámara Wi-Fi con el teléfono y anótala en las pruebas.", "Measure signal at each Wi-Fi camera with the phone and record it in the tests.")]);
+        if (aps.length) table(["AP", L2("Modelo", "Model"), L2("Altura / soporte", "Height / mount"), L2("Canales", "Channels"), L2("Cámaras", "Cameras"), L2("Enlace hacia arriba", "Uplink"), "IP"], aps.map(ap => { const st = apStats(ap); return [ap.name, model(ap).name || ap.model, `${fmt(ap.mountH ?? 4, 1)} m · ${WorkOrders.mountText(ap)}`, ap.ch24 != null ? `2,4: ${ap.ch24}${ap.ch5 ? ` · 5: ${ap.ch5}` : ""}` : "—", st.reduce((s2, x) => s2 + x.n, 0), linksOf(ap).filter(l => !["wifi_lan", "wifi_inet"].includes(l.kind)).map(l => `${other(l, ap)?.name} (${kindTxt(l.kind)})`).join(", ") || (ap.injector ? L2("inyector PoE", "PoE injector") : ""), ap.ip || ""]; }), { columnStyles: { 2: { cellWidth: 38 } } });
+        if (bridges.length) table([L2("Puente", "Bridge"), L2("Modelo", "Model"), L2("Distancia", "Distance"), L2("Tráfico / capacidad", "Traffic / capacity"), L2("Rumbo A→B", "Heading A→B"), "IP"], bridges.map(l => { const A2 = S.dev(l.a), B2 = S.dev(l.b), bs = bridgeStats(l); return [`${A2?.name} – ${B2?.name}`, Catalog.get(l.model)?.name || "", `${fmt(linkLength(l))} m`, `${fmt(bs.mbps)} / ${bs.cap} Mbps`, A2 && B2 ? `${Math.round(Geo.bearing(A2.pos, B2.pos))}° ${cardinal(Geo.bearing(A2.pos, B2.pos))}` : "", (l.ip || []).join(" / ")]; }));
+      }
+      h2(L2("Cámaras", "Cameras"));
+      bullets([L2("Fija la caja de conexiones IP66 y la base del soporte (pared, esquina o poste) con tornillería inoxidable.", "Fix the IP66 junction box and the mount base (wall, corner or pole) with stainless hardware."), L2("Deja un bucle de 30–50 cm de cable y un gotero antes de la caja; usa el conector impermeable de la cámara.", "Leave a 30–50 cm service loop and a drip loop before the box; use the camera's waterproof connector."),
+        L2("Orienta con la brújula al rumbo de la tabla y ajusta la inclinación indicada; comprueba en el monitor que una persona se vea completa a la distancia de reconocimiento.", "Aim with the compass to the table heading and set the given tilt; check on the monitor that a person is fully visible at recognition distance."),
+        L2("Evita apuntar al sol del amanecer o del atardecer y a luces directas; no dejes superficies cerca de la lente que reflejen el infrarrojo.", "Avoid aiming at the sunrise or sunset and at direct lights; keep reflective surfaces away from the lens (IR bounce)."), L2("Aprieta todo y sella las entradas de cable.", "Tighten everything and seal cable entries.")]);
+      table(["#", L2("Cámara", "Camera"), L2("Modelo", "Model"), L2("Coordenadas", "Coordinates"), L2("Altura", "Height"), L2("Rumbo", "Heading"), L2("Incl.", "Tilt"), L2("Soporte", "Mount"), L2("Conexión", "Connection"), L2("Energía", "Power"), "IP"], cams.map((c, i) => { const r = camRanges(c); return [i + 1, c.name, model(c).name || c.model, `${c.pos[0].toFixed(6)}, ${c.pos[1].toFixed(6)}`, `${fmt(c.mountH ?? 3, 1)} m`, `${Math.round(c.heading || 0)}° ${cardinal(c.heading || 0)}`, deg0(r.tilt), { wall: L2("Pared", "Wall"), corner: L2("Esquina", "Corner"), pole: L2("Poste", "Pole") }[c.mount] || "", WorkOrders.connText(c), WorkOrders.powerText(c), c.ip || ""]; }), { styles: { fontSize: 6.8, cellPadding: 1.1 }, columnStyles: { 0: { cellWidth: 6 }, 2: { cellWidth: 24 }, 3: { cellWidth: 24 }, 8: { cellWidth: 30 } } });
+      if (sirens.length) {
+        h2(L2("Sirenas", "Sirens"));
+        bullets([L2("Monta la sirena a 3 m o más, fuera del alcance de la mano y con la bocina hacia abajo o de lado para que no entre agua.", "Mount the siren at 3 m or more, out of reach, horn facing down or sideways to keep water out."), L2("El relé y la fuente de 12 V van en caja estanca; prueba el disparo antes de cerrar.", "Relay and 12 V supply go in a sealed box; test triggering before closing it.")]);
+        table([L2("Sirena", "Siren"), L2("Modelo", "Model"), L2("Disparo", "Trigger"), L2("Conexión", "Connection"), L2("Coordenadas", "Coordinates")], sirens.map(s => [s.name, model(s).name || s.model, Catalog.get(s.actuator)?.name || model(s).conn || "", WorkOrders.connText(s), `${s.pos[0].toFixed(6)}, ${s.pos[1].toFixed(6)}`]));
+      }
+      if (ups.length) { h2(L2("Respaldo eléctrico (UPS)", "Power backup (UPS)")); table(["UPS", L2("Modelo", "Model"), L2("Respalda", "Backs up"), L2("Carga", "Load"), L2("Autonomía", "Runtime")], ups.map(u => { const st = upsStats(u); return [u.name, model(u).name || u.model, st.near.map(x => x.name).join(", "), `${fmt(st.load)} W`, st.load ? `≈ ${fmt(st.min)} min` : "—"]; })); note(L2("Durante un corte de luz la autonomía debe cubrir al menos el arranque del generador. Prueba cada UPS desconectándolo de la red con todos sus equipos encendidos.", "During a power cut, runtime must at least cover generator start. Test each UPS by unplugging it with all its devices on."), "warn"); }
+    }
+
+    /* ---- 5. configuración ---- */
+    if (opt.secs.config) {
+      h1(L2("Configuración", "Configuration"));
+      h2(L2("Plan de direcciones IP", "IP address plan"));
+      para(L2(`Red 10.10.0.0/16 · máscara ${IP_MASK} · puerta de enlace ${V.devices.find(d => d.type === "router")?.ip || "10.10.0.1"}${N.internet ? " · DNS: el del router" : " · sin salida a internet"}. Infraestructura en 10.10.0.x; las cámaras de cada puesto en su propio bloque. Configura todas las IP como fijas (o reservas DHCP) y anótalas en el as-built.`, `Network 10.10.0.0/16 · mask ${IP_MASK} · gateway ${V.devices.find(d => d.type === "router")?.ip || "10.10.0.1"}${N.internet ? " · DNS: the router's" : " · no internet access"}. Infrastructure on 10.10.0.x; each post's cameras in their own block. Set all IPs as static (or DHCP reservations) and record them in the as-built.`));
+      table(["IP", L2("Equipo", "Device"), L2("Tipo", "Type"), L2("Modelo", "Model"), L2("Puesto", "Post")], devs.filter(d => d.ip).sort((x, z) => x.ip.localeCompare(z.ip, undefined, { numeric: true })).map(d => [d.ip, d.name, t("type_" + d.type), model(d).name || d.model, postOf(d)?.name || ""]), { columnStyles: { 0: { cellWidth: 24 } } });
+      h2(L2("Seguridad básica de la red", "Basic network security"));
+      bullets([L2("Cambia todas las contraseñas de fábrica por contraseñas largas y únicas; entrégalas por escrito aparte, no en este manual.", "Change every factory password to a long unique one; hand them over separately in writing, not in this manual."), L2("Actualiza el firmware de grabadores, cámaras, AP y router antes de entregar.", "Update recorder, camera, AP and router firmware before handover."),
+        L2("Sincroniza la hora con NTP y la zona horaria America/Caracas (UTC−4) en todos los equipos: las grabaciones deben tener la hora correcta.", "Sync time via NTP and the America/Caracas time zone (UTC−4) on all devices: recordings must have the correct time."), L2("No abras puertos del router hacia el grabador; para ver desde fuera usa la app oficial de la marca o una VPN.", "Do not forward router ports to the recorder; for remote viewing use the brand's official app or a VPN."),
+        L2("Desactiva UPnP y los servicios que no se usen; si los switches son administrables, separa las cámaras en su propia VLAN.", "Disable UPnP and unused services; if switches are managed, put cameras on their own VLAN."), L2("Exporta y guarda una copia de la configuración de cada equipo al terminar.", "Export and keep a copy of each device's configuration when done.")]);
+      h2(L2("Grabadores y canales", "Recorders and channels"));
+      bullets([L2("Asistente inicial: idioma, contraseña de administrador, hora, red con la IP del plan.", "Initial wizard: language, admin password, time, network with the plan IP."), L2("Formatea los discos e inicia la grabación según el escenario del proyecto.", "Format the disks and start recording per the project scenario."), L2("Agrega las cámaras en el canal indicado (protocolo de la marca; ONVIF para otras marcas) y ponles el nombre de la tabla.", "Add cameras on the given channel (brand protocol; ONVIF for other brands) and name them as in the table."), L2("Activa la detección de personas y vehículos o cruce de línea en las cámaras que lo permitan para reducir falsas alarmas.", "Enable person/vehicle detection or line crossing on cameras that support it to reduce false alarms.")], true);
+      table([L2("Grabador", "Recorder"), L2("Canal", "Channel"), L2("Cámara", "Camera"), L2("Modelo", "Model"), "IP", L2("Protocolo", "Protocol")], cams.filter(c => chanOf.has(c)).sort((x, z) => byName(chanOf.get(x).r, chanOf.get(z).r) || chanOf.get(x).ch - chanOf.get(z).ch).map(c => { const o = chanOf.get(c); return [o.r.name, o.ch, c.name, model(c).name || c.model, c.ip || "", model(c).brand === model(o.r).brand ? L2("de la marca", "brand") : "ONVIF"]; }));
+      if (cams.some(c => !chanOf.has(c))) note(L2(`Sin grabador alcanzable: ${cams.filter(c => !chanOf.has(c)).map(c => c.name).join(", ")}. Graban en su tarjeta microSD o quedan pendientes.`, `No reachable recorder: ${cams.filter(c => !chanOf.has(c)).map(c => c.name).join(", ")}. They record to their microSD card or remain pending.`), "warn");
+      h2(L2("Ajustes de las cámaras", "Camera settings"));
+      const groups = {}; cams.forEach(c => { (groups[c.model] ||= []).push(c); });
+      table([L2("Modelo", "Model"), t("cams"), L2("Resolución", "Resolution"), "fps", L2("Compresión", "Codec"), L2("Tasa", "Bitrate"), L2("Grabación", "Recording")], Object.entries(groups).map(([mid, cs]) => { const m = Catalog.get(mid) || {}, pp = recProfile(cs[0]); return [m.name || mid, cs.length, m.res ? m.res.join(" × ") : "—", eventOnly(cs[0]) ? "—" : pp.fps, eventOnly(cs[0]) ? "—" : { h264: "H.264", h265: "H.265", smart: "H.265+" }[pp.codec], `≈ ${camMbps(cs[0])} Mbps`, eventOnly(cs[0]) ? L2("Solo al detectar (solar/batería)", "On events only (solar/battery)") : pp.mode === "motion" ? L2("Por movimiento", "On motion") : L2("Continua", "Continuous")]; }));
+      bullets([L2("Nombre en pantalla (OSD) igual al de la tabla; hora visible.", "On-screen name (OSD) as in the table; time visible."), L2("Infrarrojo en automático; WDR activado si hay contraluz.", "IR on auto; WDR on if there is backlight."), L2("Máscaras de privacidad sobre ventanas o patios vecinos.", "Privacy masks over neighbors' windows or yards."), L2("Usuario de solo lectura para los puestos de visualización.", "Read-only user for viewing posts.")]);
+      if (aps.length) {
+        h2(L2("Red Wi-Fi de las cámaras", "Camera Wi-Fi network"));
+        bullets([L2("Una red (SSID) exclusiva para cámaras, con WPA2 o WPA3-Personal y contraseña larga; no la compartas con los residentes.", "A dedicated SSID for cameras, WPA2 or WPA3-Personal with a long password; do not share it with residents."), L2("Canales fijos según la tabla de AP (2,4 GHz: 1, 6 y 11 con 20 MHz de ancho). No uses canal automático.", "Fixed channels per the AP table (2.4 GHz: 1, 6 and 11 at 20 MHz width). Do not use auto channel."),
+          L2("Potencia media al principio; súbela solo si una cámara queda por debajo de −67 dBm.", "Start at medium power; raise it only if a camera falls below −67 dBm."), L2("Cada cámara con IP fija del plan; conéctala al AP indicado en la tabla de cámaras.", "Each camera with its plan static IP; join it to the AP shown in the camera table."), L2("La señal de diseño es −67 dBm o mejor; por debajo de −70 dBm reubica el AP o la cámara.", "Design signal is −67 dBm or better; below −70 dBm relocate the AP or camera.")]);
+      }
+      const alarmLinks = V.links.filter(l => l.kind === "alarm");
+      if (sirens.length) {
+        h2(L2("Sirenas y salidas de alarma", "Sirens and alarm outputs"));
+        const outIdx = new Map();
+        if (alarmLinks.length) table([L2("Origen", "Source"), L2("Salida", "Output"), L2("Sirena", "Siren"), L2("Regla sugerida", "Suggested rule")], alarmLinks.map(l => { const A2 = S.dev(l.a), B2 = S.dev(l.b), src = A2?.type === "siren" ? B2 : A2, sr = A2?.type === "siren" ? A2 : B2; const k = (outIdx.get(src) || 0) + 1; outIdx.set(src, k); return [src?.name, `${L2("Salida de alarma", "Alarm output")} ${k}`, sr?.name, L2("Intrusión o cruce de línea en las cámaras de esa zona, de noche; duración 30–60 s", "Intrusion or line crossing on that zone's cameras at night; 30–60 s duration")]; }));
+        bullets([sirens.some(s => s.actuator === "tapo-p400m") ? L2("Sirenas con enchufe inteligente: crea la acción automática en la app de la marca; funcionan solo con internet.", "Smart-plug sirens: create the automation in the brand's app; they only work with internet.") : null, sirens.some(s => model(s).conn === "poe") ? L2("Sirenas PoE: adóptalas en el software del grabador y asígnalas a las alarmas de las cámaras cercanas.", "PoE sirens: adopt them in the recorder software and assign them to nearby camera alarms.") : null, L2("Define horario (por ejemplo, de 7 p. m. a 6 a. m.) para evitar disparos con el movimiento normal del día.", "Set a schedule (e.g. 7 p.m. to 6 a.m.) to avoid triggers from normal daytime traffic.")]);
+      }
+      if (posts.length > 1 || devs.some(d => d.type === "display" && model(d).client)) {
+        h2(L2("Puestos de visualización", "Viewing posts"));
+        bullets([L2("En el mini PC de cada puesto secundario instala el software de visualización de la marca del grabador y agrega todos los grabadores por su IP.", "On each secondary post's mini PC install the recorder brand's viewing software and add every recorder by its IP."), L2("Crea un usuario de solo vista por puesto; arma la vista en mosaico por zona.", "Create a view-only user per post; set up a tiled view per zone."), L2("Comprueba que desde cada puesto se vean todas las cámaras (capítulo de pruebas).", "Check that every camera is visible from each post (tests chapter).")]);
+      }
+      h2(L2("Notas por marca", "Brand notes"));
+      const BN = {
+        "TP-Link": [L2("Grabador VIGI: asistente inicial con monitor y mouse o desde la app VIGI; las cámaras VIGI se detectan en la red y se agregan con su contraseña.", "VIGI recorder: initial wizard with monitor and mouse or from the VIGI app; VIGI cameras are discovered on the network and added with their password."), L2("Gestión central en PC: VIGI Security Manager; en el teléfono: app VIGI.", "Central management on PC: VIGI Security Manager; on the phone: VIGI app."), L2("Omada (AP y router): adopta los equipos en el controlador Omada (OC200, software o app) y aplica SSID, canales y potencia del plan.", "Omada (APs and router): adopt devices in the Omada controller (OC200, software or app) and apply the plan's SSID, channels and power.")],
+        Ubiquiti: [L2("Configura la consola (UNVR o Cloud Gateway) con la app UniFi o el navegador y crea la cuenta de administrador.", "Set up the console (UNVR or Cloud Gateway) with the UniFi app or browser and create the admin account."), L2("UniFi Protect: adopta las cámaras y define grabación y retención.", "UniFi Protect: adopt cameras and set recording and retention."), L2("UniFi Network: adopta AP y switches; crea la red Wi-Fi de cámaras y fija canales y potencia.", "UniFi Network: adopt APs and switches; create the camera Wi-Fi and fix channels and power.")],
+        Hikvision: [L2("Activa cada equipo (grabador y cámaras) con la herramienta SADP desde una PC: contraseña segura e IP fija del plan.", "Activate each device (recorder and cameras) with the SADP tool from a PC: strong password and plan static IP."), L2("En el grabador agrega las cámaras con el protocolo de la marca y configura las salidas de alarma para las sirenas.", "On the recorder add cameras with the brand protocol and set alarm outputs for the sirens."), L2("Visualización: iVMS-4200 en PC y Hik-Connect en el teléfono (si hay internet).", "Viewing: iVMS-4200 on PC and Hik-Connect on the phone (with internet).")],
+        Tapo: [L2("Configura cámaras y HomeBase con la app Tapo (requiere cuenta TP-Link) y vincula cada cámara al HomeBase.", "Set up cameras and HomeBase with the Tapo app (requires a TP-Link account) and link each camera to the HomeBase."), L2("Para grabar una cámara Tapo en un NVR por ONVIF/RTSP, crea la cuenta de la cámara en su configuración avanzada en la app.", "To record a Tapo camera on an NVR via ONVIF/RTSP, create the camera account in its advanced settings in the app."), L2("Las acciones inteligentes (sirenas, enchufes) dependen de internet.", "Smart actions (sirens, plugs) depend on internet.")],
+        EZVIZ: [L2("Configura cámaras, grabador y gateway con la app EZVIZ; las sirenas Zigbee se emparejan con el gateway A3.", "Set up cameras, recorder and gateway with the EZVIZ app; Zigbee sirens pair with the A3 gateway.")],
+        "Genérico": [L2("Equipos genéricos: verifica ONVIF activo en las cámaras y usa el mismo usuario en todas.", "Generic devices: check ONVIF is enabled on cameras and use the same user on all of them.")]
+      };
+      [...brands].filter(br => BN[br]).forEach(br => { h3(br); bullets(BN[br]); });
+      if (ai && ai.length) {
+        h2(L2("Pasos específicos por modelo (redactados por IA)", "Model-specific steps (AI-written)"));
+        note(L2("Redactado por la IA a partir de este diseño. Verifica cada paso con el manual del fabricante antes de aplicarlo.", "Written by the AI from this design. Check each step against the manufacturer's manual before applying it."), "warn");
+        ai.forEach(s => { h3(s.title); bullets(s.steps, true); if (s.warnings.length) note(s.warnings.join(" · "), "warn"); });
+      } else if (aiErr) note(L2(`No se pudieron agregar los pasos de la IA: ${aiErr}`, `Could not add the AI steps: ${aiErr}`), "warn");
+    }
+
+    /* ---- 6. pruebas ---- */
+    if (opt.secs.tests) {
+      h1(L2("Pruebas y puesta en marcha", "Tests and commissioning"));
+      table([L2("Prueba", "Test"), L2("Cómo", "How"), L2("Resultado", "Result")], [
+        [L2("Cableado", "Cabling"), L2("Probar cada tramo Cat6 (continuidad y pares) y anotar la longitud medida.", "Test each Cat6 run (continuity and pairs) and record the measured length."), box],
+        [L2("PoE", "PoE"), L2("Cada equipo enciende; el consumo de cada switch queda dentro de su presupuesto.", "Every device powers up; each switch's draw stays within its budget."), box],
+        has("fiber") ? [L2("Fibra", "Fiber"), L2("Potencia óptica dentro del rango del SFP; enlace activo en ambos switches.", "Optical power within the SFP range; link up on both switches."), box] : null,
+        bridges.length ? [L2("Puentes", "Bridges"), L2("Señal y velocidad medidas mayores que el tráfico de la tabla de puentes.", "Measured signal and throughput above the traffic in the bridge table."), box] : null,
+        aps.length ? [L2("Wi-Fi", "Wi-Fi"), L2("Señal en cada cámara Wi-Fi de −67 dBm o mejor (anexo de verificación).", "Signal at each Wi-Fi camera −67 dBm or better (verification annex)."), box] : null,
+        [L2("Imagen de día", "Day image"), L2("Enfoque, rumbo e inclinación según la tabla; sin contraluces.", "Focus, heading and tilt per the table; no backlight."), box],
+        [L2("Imagen de noche", "Night image"), L2("Infrarrojo activo; una persona visible a la distancia de detección nocturna.", "IR active; a person visible at night detection distance."), box],
+        [L2("Densidad de píxeles", "Pixel density"), L2("Con una persona caminando, confirmar reconocimiento a la distancia indicada (sonda PPM de la app).", "With a person walking, confirm recognition at the stated distance (app PPM probe)."), box],
+        [L2("Grabación", "Recording"), L2("Todas las cámaras grabando; reproducir 10 minutos de cada grabador; hora correcta.", "All cameras recording; play back 10 minutes from each recorder; correct time."), box],
+        [L2("Retención", "Retention"), L2(`Después de 24 h, estimar los días con el uso real del disco (meta: ${p.days} días).`, `After 24 h, estimate days from actual disk use (target: ${p.days} days).`), box],
+        sirens.length ? [L2("Sirenas", "Sirens"), L2("Disparo desde el grabador o la app; y por evento de cámara en horario nocturno.", "Trigger from the recorder or app; and by camera event in the night schedule."), box] : null,
+        [L2("Corte de energía", "Power cut"), L2("Desconectar la red eléctrica: todos los nodos siguen con UPS el tiempo indicado.", "Cut mains power: every node stays up on UPS for the stated time."), box],
+        posts.length > 1 ? [L2("Puestos de control", "Control posts"), L2("Desde cada puesto se ven todas las cámaras.", "Every camera is visible from each post."), box] : null,
+        N.internet ? [L2("Acceso remoto", "Remote access"), L2("Vista desde el teléfono con la app oficial, sin puertos abiertos.", "Viewing from the phone with the official app, no open ports."), box] : null,
+        [L2("Respaldo", "Backup"), L2("Configuración de cada equipo exportada y guardada.", "Each device's configuration exported and stored."), box]].filter(Boolean), { columnStyles: { 0: { cellWidth: 34, fontStyle: "bold" }, 2: { cellWidth: 22, halign: "center" } } });
+      h2(L2("Verificación por cámara", "Per-camera verification"));
+      table([L2("Cámara", "Camera"), "IP", L2("Día", "Day"), L2("Noche", "Night"), L2("Graba", "Records"), L2("Wi-Fi medido", "Measured Wi-Fi"), L2("Observaciones", "Notes")], cams.map(c => [c.name, c.ip || "", box, box, box, (model(c).net || []).some(n => n.startsWith("wifi")) && !linksOf(c, ["cat6"]).length ? "______ dBm" : "—", ""]), { styles: { fontSize: 7.6, cellPadding: 1.6, minCellHeight: 6 }, columnStyles: { 2: { halign: "center" }, 3: { halign: "center" }, 4: { halign: "center" }, 6: { cellWidth: 50 } } });
+    }
+
+    /* ---- 7. mantenimiento ---- */
+    if (opt.secs.maint) {
+      h1(L2("Mantenimiento", "Maintenance"));
+      table([L2("Tarea", "Task"), L2("Frecuencia", "Frequency")], [
+        [L2("Revisar que todas las cámaras se vean y graben", "Check every camera is visible and recording"), L2("Diario (guardia)", "Daily (guard)")],
+        [L2("Reproducir grabaciones de prueba y verificar la hora", "Play back test recordings and check time"), L2("Semanal", "Weekly")],
+        [L2("Limpiar lentes y domos (más seguido en lluvia o polvo)", "Clean lenses and domes (more often with rain or dust)"), L2("Cada 3 meses", "Every 3 months")],
+        [L2("Revisar imagen nocturna e infrarrojo; telarañas e insectos", "Check night image and IR; cobwebs and insects"), L2("Mensual", "Monthly")],
+        sirens.length ? [L2("Probar sirenas", "Test sirens"), L2("Mensual", "Monthly")] : null,
+        [L2("Estado de los discos (S.M.A.R.T.); reemplazo preventivo", "Disk health (S.M.A.R.T.); preventive replacement"), L2("Mensual · cada 3–5 años", "Monthly · every 3–5 years")],
+        [L2("Prueba de autonomía de los UPS; reemplazo de baterías", "UPS runtime test; battery replacement"), L2("Cada 6 meses · cada 2–3 años", "Every 6 months · every 2–3 years")],
+        [L2("Firmware y contraseñas", "Firmware and passwords"), L2("Cada 6 meses", "Every 6 months")],
+        [L2("Podar vegetación que tape cámaras o enlaces", "Trim vegetation blocking cameras or links"), L2("Cada 3 meses", "Every 3 months")],
+        cams.some(c => model(c).power === "solar") ? [L2("Limpiar paneles solares y revisar carga de baterías", "Clean solar panels and check battery charge"), L2("Mensual", "Monthly")] : null,
+        aps.length || bridges.length ? [L2("Medir señal Wi-Fi y alineación de puentes", "Measure Wi-Fi signal and bridge alignment"), L2("Cada 6 meses", "Every 6 months")] : null,
+        [L2("Puesta a tierra, conectores exteriores y corrosión", "Grounding, outdoor connectors and corrosion"), L2("Anual", "Yearly")],
+        [L2("Respaldo de configuración", "Configuration backup"), L2("Después de cada cambio", "After every change")]].filter(Boolean), { columnStyles: { 1: { cellWidth: 52 } } });
+    }
+
+    /* ---- 8. anexos ---- */
+    if (opt.secs.annex) {
+      h1(L2("Anexos", "Annexes"));
+      h2(L2("As-built (datos de instalación)", "As-built (installation data)"));
+      const war = d => { if (!d.installed || !d.warranty) return ""; const x = new Date(d.installed); x.setMonth(x.getMonth() + d.warranty); return x.toISOString().slice(0, 10); };
+      table([L2("Equipo", "Device"), L2("Modelo", "Model"), "IP", L2("N.º de serie", "Serial no."), "MAC", L2("Instalado", "Installed"), L2("Garantía hasta", "Warranty until")], devs.filter(d => !["pole", "station"].includes(d.type)).map(d => [d.name, model(d).name || d.model, d.ip || "", d.serial || "", d.mac || "", d.installed || "", war(d)]), { styles: { fontSize: 7.4, cellPadding: 1.6, minCellHeight: 6 }, columnStyles: { 3: { cellWidth: 30 }, 4: { cellWidth: 30 } } });
+      const pend = a.warnings.filter(w => w.lvl !== "info");
+      h2(L2("Pendientes al generar el manual", "Pending items when the manual was generated"));
+      if (pend.length) table([L2("Nivel", "Level"), L2("Detalle", "Detail"), L2("Resuelto", "Solved")], pend.map(w => [t("lvl_" + w.lvl), w.msg, box]), { columnStyles: { 0: { cellWidth: 22 }, 2: { cellWidth: 18, halign: "center" } } });
+      else para(L2("Sin pendientes: el diseño no tenía problemas ni advertencias.", "None: the design had no problems or warnings."));
+      h2(L2("Acta de entrega", "Handover record"));
+      para(L2("Se entrega el sistema instalado, configurado y probado según este manual, junto con las contraseñas (en sobre aparte), el as-built y los respaldos de configuración.", "The system is handed over installed, configured and tested per this manual, together with the passwords (in a separate envelope), the as-built and the configuration backups."));
+      ensure(40); y += 14; doc.setDrawColor(...MUT); doc.setLineWidth(.3);
+      [[M, opt.installer || L2("Instalador", "Installer")], [M + CW / 2 + 6, opt.receiver || L2("Recibe", "Received by")]].forEach(([x, lab]) => { doc.line(x, y, x + CW / 2 - 12, y); doc.setFontSize(9); doc.setTextColor(...MUT); doc.text(T(`${lab} · ${L2("firma y fecha", "signature and date")}`), x, y + 5); });
+      y += 12;
+    }
+
+    /* ---- índice y pies de página ---- */
+    say(L2("Armando el índice…", "Building the table of contents…"));
+    const tocH = 21 + toc.reduce((s2, e) => s2 + (e.lvl === 1 ? 7 : 5.4), 0), tocN = Math.max(1, Math.ceil(tocH / (H - 20 - M)));
+    for (let k = 0; k < tocN; k++) doc.insertPage(2);
+    let tp = 2; doc.setPage(tp); y = M;
+    doc.setFont("helvetica", "bold"); doc.setFontSize(17); doc.setTextColor(...INK); doc.text(T(L2("Contenido", "Contents")), M, y + 7); y += 14;
+    toc.forEach(e => { if (y > H - 20) { tp++; doc.setPage(tp); y = M + 6; } const pg = String(e.p + tocN); doc.setFont("helvetica", e.lvl === 1 ? "bold" : "normal"); doc.setFontSize(e.lvl === 1 ? 10.5 : 9.3); doc.setTextColor(...(e.lvl === 1 ? INK : MUT)); const x0 = M + (e.lvl === 1 ? 0 : 6), txt = T(e.t); doc.text(txt, x0, y); const tw = doc.getTextWidth(txt); doc.setTextColor(170); let dots = ""; while (doc.getTextWidth(dots + ".") < CW - (x0 - M) - tw - doc.getTextWidth(pg) - 4) dots += "."; doc.text(dots, x0 + tw + 2, y); doc.setTextColor(...INK); doc.text(pg, M + CW, y, { align: "right" }); y += e.lvl === 1 ? 7 : 5.4; });
+    const n = doc.getNumberOfPages();
+    for (let i = 2; i <= n; i++) { doc.setPage(i); doc.setFont("helvetica", "normal"); doc.setFontSize(7.8); doc.setTextColor(...MUT); doc.text(T(`${P.name} · ${V.name} · ${L2("Manual técnico", "Technical manual")}`), M, H - 7); doc.text(`${i} / ${n}`, W - M, H - 7, { align: "right" }); }
+    return doc.output("blob");
+  }
+};
 
 /* ---- catui.js ---- */
 /* ===== Catálogo editable ===== */
@@ -5517,6 +5870,7 @@ function exportMenu(btn) {
     <button class="mi" data-v="kml">${svg("globe")} ${t("exportKml")}</button>
     <button class="mi" data-v="csv">${svg("budget")} ${t("exportCsv")}</button>
     <button class="mi" data-v="json">${svg("folder")} ${t("exportJson")}</button>
+    <button class="mi" data-v="manual">${svg("book")} ${L2("Manual técnico (PDF)", "Technical manual (PDF)")}</button>
     <button class="mi" data-v="orders">${svg("list")} ${L2("Órdenes de instalación (PDF)", "Work orders (PDF)")}</button>
     <button class="mi" data-v="topo">${svg("chart")} ${L2("Topología de red (PNG)", "Network topology (PNG)")}</button>
     <button class="mi" data-v="inv">${svg("router")} ${L2("IP e inventario (CSV)", "IPs and inventory (CSV)")}</button>
@@ -5531,6 +5885,7 @@ function exportMenu(btn) {
     if (v === "csv") Export.csv();
     if (v === "json") Export.json();
     if (v === "orders") WorkOrders.pdf();
+    if (v === "manual") Manual.open();
     if (v === "quote") Quote.open();
     if (v === "topo") Topo.open();
     if (v === "inv") Export.inventory();
